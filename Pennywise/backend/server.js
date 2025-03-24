@@ -13,7 +13,7 @@ const db = new pg.Pool({
     user: "postgres", // Change this to your PostgreSQL user
     host: "localhost",
     database: "financial_tracker", // Change to your actual database name
-    password: "Picxcell231128", // Change to your actual database password
+    password: "newpassword", // Change to your actual database password
     port: 5432,
   });
 
