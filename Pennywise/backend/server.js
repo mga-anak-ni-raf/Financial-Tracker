@@ -10,12 +10,9 @@ const port = 5000;
 
 // PostgreSQL setup
 const db = new pg.Pool({
-    user: "postgres", // Change this to your PostgreSQL user
-    host: "localhost",
-    database: "financial_tracker", // Change to your actual database name
-    password: "newpassword", // Change to your actual database password
-    port: 5432,
-  });
+  connectionString: "postgresql://neondb_owner:npg_l1NJj4eSpGHI@ep-royal-hall-a1z9u95d-pooler.ap-southeast-1.aws.neon.tech:5432/neondb",
+  ssl: { rejectUnauthorized: false } // Required for Neon.tech
+});
 
 // Test database connection
 db.connect()
