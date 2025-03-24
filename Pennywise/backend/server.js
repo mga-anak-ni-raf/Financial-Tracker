@@ -107,7 +107,8 @@ app.post("/signup", async (req, res) => {
     // Log in user after successful signup
     req.session.username = username;
 
-    res.redirect("/homepage"); // Redirect after signup
+    // ✅ Send JSON instead of redirecting
+    res.json({ success: true, redirect: "/homepage" });
   } catch (error) {
     console.error("Signup error:", error);
     res.status(500).json({ message: "Server error during signup." });
@@ -141,7 +142,9 @@ app.post("/login", async (req, res) => {
     // Store session data
     req.session.username = user.username;
 
-    res.redirect("/homepage"); // Redirect after login
+
+     // ✅ Send JSON instead of redirecting
+     res.json({ success: true, redirect: "/homepage" });
   } catch (error) {
     console.error("Login error:", error);
     res.status(500).json({ message: "Server error during login." });
