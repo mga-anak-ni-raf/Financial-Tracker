@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Home Page</title>
+    <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+    <div class="header">
+        <h1>PROJECT NAME</h1>
+        <div class="header-right">
+            <span>Welcome, <%- username %>!</span>
+            <a href="/calendar">Calendar</a>
+            <a href="/stats">Stats</a>
+            <a href="/notes">Notes</a>
+            <a href="/savings">Savings</a>
+            <a href="/logout" class="logout-button">Logout</a> <!-- Logout button -->
+        </div>
+    </div>
+    <div class="content">
+        <div class="left-section">
+            <div class="block">
+                Wallet <br>
+                999,999,999.99
+            </div>
+            <div class="block">
+                Transaction
+            </div>
+            <div class="block">
+                Summary/Graph/Stats
+            </div>
+        </div>
+        <div class="right-section">
+            CATEGORIES
+        </div>
+    </div>
+</body>
+</html>
