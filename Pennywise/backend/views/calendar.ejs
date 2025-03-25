@@ -4,19 +4,19 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Interactive Calendar with Events</title>
-    <link rel="stylesheet" href="/style.css">
     <style>
         body {
             font-family: Arial, sans-serif;
             text-align: center;
             margin: 20px;
-            background-color: #ffebeb;
+            background-color: #1a1a1a;
+            background: linear-gradient(to right,#f0757575, #cbf6db, #f0757575);
         }
         .header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            background-color: #d07575;
+            background-color: #1a1a1a;
             padding: 15px 20px;
             margin-bottom: 50px;
         }
@@ -25,7 +25,7 @@
             color: white;
         }
         .header-right a {
-            margin-left: 20px;
+            margin-left: 10px;
             color: white;
             text-decoration: none;
         }
@@ -48,13 +48,15 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            background: #d07575;
+            background: #1a1a1a;
+            border: 2px solid #ff007f;
             color: white;
             padding: 10px;
             border-radius: 5px;
+            margin-top: 100px;
         }
         .calendar-header button {
-            background: white;
+            background:  #ff007f;
             border: none;
             padding: 5px 10px;
             cursor: pointer;
@@ -70,16 +72,17 @@
             width: 14%;
             padding: 10px;
             text-align: center;
-            border: 1px solid #ddd;
+            border: 1px solid #ff007f;
             cursor: pointer;
             position: relative;
         }
         th {
-            background: #d07575;
+            background: #1a1a1a;
             color: white;
+            border: 2px solid #ff007f;
         }
         .today {
-            background: #d07575;
+            background: #1a1a1a;
             color: white;
             font-weight: bold;
         }
@@ -100,17 +103,17 @@
     </style>
 </head>
 <body>
-    <div class="header">
-        <h1><a href="/homepage">PROJECT NAME</a></h1>
+    <header class="top-bar">
+        <h1><a href="/homepage">Ctrl.save</a></h1>
         <div class="header-right">
-            <span>Welcome, <%= username %>!</span>
+            <span>Welcome, <%- username %>!</span>
             <a href="/calendar">Calendar</a>
             <a href="/stats">Stats</a>
             <a href="/notes">Notes</a>
             <a href="/savings">Savings</a>
+            <a href="/wallet">Wallet</a>
             <a href="/logout" class="logout-button">Logout</a>
         </div>
-    </div>
 
     <div class="calendar-container">
         <div class="calendar-header">

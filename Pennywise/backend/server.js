@@ -58,6 +58,11 @@ app.get("/login", (req, res) => {
   res.render("login");
 });
 
+//wallet page
+app.get("/wallet", (req, res) => {
+  res.render("wallet");
+});
+
 // Logout
 app.get("/logout", (req, res) => {
   req.session.destroy(() => {
