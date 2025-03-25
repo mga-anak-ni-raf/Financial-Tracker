@@ -4,35 +4,178 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login</title>
-    <link rel="stylesheet" href="style.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: Arial, sans-serif;
+        }
+        body {
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            background: linear-gradient(to top, #f0757575, #cbf6db, #f0757575);
+            padding-top: 70px;
+            padding-bottom: 50px;
+        }
+        header, footer {
+            width: 100%;
+            padding: 1rem;
+            background: #1a1a1a;
+            color: white;
+            text-align: center;
+            position: fixed;
+            left: 0;
+        }
+        header {
+            top: 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 10%;
+            border-bottom: 3px solid #ff007f;
+        }
+        nav ul {
+            list-style: none;
+            display: flex;
+            gap: 15px;
+        }
+        nav ul li a {
+            color: white;
+            text-decoration: none;
+            font-weight: bold;
+            transition: color 0.3s;
+            cursor: pointer;
+        }
+        nav ul li a:hover {
+            color: #ff007f;
+        }
+        footer {
+            bottom: 0;
+            display: flex;
+            justify-content: space-between;
+            padding: 1rem 10%;
+            border-top: 3px solid #ff007f;
+        }
+        .container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100%;
+            gap: 50px;
+        }
+        .login-container {
+            background: #1a1a1a;
+            padding: 2rem;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(255, 0, 127, 0.5);
+            width: 500px;
+            color: white;
+            border: 2px solid #ff007f;
+            text-align: center;
+            height: 300px;
+        }
+        .login-container input {
+            width: 90%;
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #ff007f;
+            border-radius: 5px;
+            background: #333;
+            color: white;
+        }
+        .login-container button {
+            width: 90%;
+            padding: 10px;
+            border: none;
+            background: #ff007f;
+            color: white;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background 0.3s;
+            font-weight: bold;
+        }
+        .login-container button:hover {
+            background: #e60073;
+        }
+        .tagline {
+            text-align: center;
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #1a1a1a;
+            max-width: 400px;
+        }
+        .sidebar {
+            position: fixed;
+            top: 70px;
+            right: -250px;
+            width: 250px;
+            height: calc(100% - 70px);
+            background: #1a1a1a;
+            color: white;
+            padding: 20px;
+            transition: right 0.3s;
+            border-left: 3px solid #ff007f;
+        }
+        .sidebar.active {
+            right: 0;
+        }
+    </style>
 </head>
 <body>
-    <div class="login-container">
-        <h2>Login</h2>
-        <form id="login-form">
-            <input type="text" id="username" placeholder="Enter Username" required>
-            <input type="password" id="password" placeholder="Enter Password" required>
-            <button type="submit">Login</button>
-        </form>
-        <p>Don't have an account? <a href="/signup">Sign up</a></p>
+    <header>
+        <h1>Ctrl.save</h1>
+        <nav>
+            <ul>
+                <li><a href="#" onclick="toggleSidebar('aboutSidebar')">About</a></li>
+                <li><a href="#" onclick="toggleSidebar('contactSidebar')">Contact</a></li>
+            </ul>
+        </nav>
+    </header>
+    <div class="container">
+        <div class="login-container">
+            <h2>Login</h2>
+            <form id="login-form">
+                <input type="text" id="username" placeholder="Enter Username" required>
+                <input type="password" id="password" placeholder="Enter Password" required>
+                <button type="submit">Login</button>
+            </form>
+            <p><br>Don't have an account? <a href="/signup">Sign up</a></p>
+        </div>
+        <div class="tagline">
+            <h1>Ctrl your budget,<br>save for the future.</h1>
+        </div>
     </div>
-
+    <div id="aboutSidebar" class="sidebar">
+        <h2>About Us</h2>
+        <p>We are Computer Engineering Students from the Technological Institute of the Philippines</p>
+    </div>
+    <div id="contactSidebar" class="sidebar">
+        <h2>Contact Us</h2>
+        <p>Email: contact@ctrlsave.com</p>
+    </div>
+    <footer>
+        <p>&copy; 2025 Ctrl.save. All rights reserved.</p>
+    </footer>
     <script>
+        function toggleSidebar(id) {
+            const sidebar = document.getElementById(id);
+            if (sidebar) {
+                sidebar.classList.toggle("active");
+            }
+        }
         document.getElementById("login-form").addEventListener("submit", async function(event) {
-            event.preventDefault(); // Prevent form from reloading
-
+            event.preventDefault();
             const username = document.getElementById("username").value;
             const password = document.getElementById("password").value;
-
             try {
                 const response = await fetch("http://localhost:5000/login", {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({ username, password })
                 });
-
                 const data = await response.json();
-
                 if (response.ok) {
                     alert("Login successful! Redirecting to homepage...");
                     window.location.href = "/homepage";

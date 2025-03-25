@@ -3,37 +3,143 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Home Page</title>
-    <link rel="stylesheet" href="/style.css">
+    <title>Dashboard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: Arial, sans-serif;
+        }
+        body {
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            background: linear-gradient(to right, #000000, #ff007f, #000000);
+            color: white;
+        }
+        .top-bar {
+            background: #1a1a1a;
+            padding: 15px 10%;
+            border-bottom: 3px solid #ff007f;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .top-bar h1 {
+            margin: 0;
+        }
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        .header-right a {
+            color: white;
+            text-decoration: none;
+            font-weight: bold;
+            transition: color 0.3s;
+        }
+        .header-right a:hover {
+            color: #ff007f;
+        }
+        .dashboard-container {
+            display: flex;
+            flex: 1;
+        }
+        .sidebar {
+            width: 250px;
+            background: #1a1a1a;
+            padding: 20px;
+            transition: width 0.3s ease;
+            border-right: 3px solid #ff007f;
+        }
+        .sidebar h2 {
+            color: #ff007f;
+            margin-bottom: 10px;
+        }
+        .sidebar ul {
+            list-style: none;
+        }
+        .sidebar ul li {
+            margin: 10px 0;
+        }
+        .sidebar ul li a {
+            color: white;
+            text-decoration: none;
+            font-weight: bold;
+            transition: color 0.3s;
+        }
+        .sidebar ul li a:hover {
+            color: #ff007f;
+        }
+        .main-content {
+            flex: 1;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+        }
+        .section {
+            background: #1a1a1a;
+            padding: 20px;
+            margin-top: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(255, 0, 127, 0.5);
+            border: 2px solid #ff007f;
+        }
+        .content {
+            display: flex;
+            gap: 20px;
+        }
+        .left-section, .right-section {
+            flex: 1;
+        }
+        .block {
+            background: #1a1a1a;
+            padding: 20px;
+            margin-top: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(255, 0, 127, 0.5);
+            border: 2px solid #ff007f;
+            text-align: center;
+        }
+    </style>
 </head>
 <body>
-    <div class="header">
-        <h1>PROJECT NAME</h1>
+    <header class="top-bar">
+        <h1>Ctrl.save</h1>
         <div class="header-right">
             <span>Welcome, <%- username %>!</span>
             <a href="/calendar">Calendar</a>
             <a href="/stats">Stats</a>
             <a href="/notes">Notes</a>
             <a href="/savings">Savings</a>
-            <a href="/logout" class="logout-button">Logout</a> <!-- Logout button -->
+            <a href="/logout" class="logout-button">Logout</a>
         </div>
-    </div>
-    <div class="content">
-        <div class="left-section">
-            <div class="block">
-                Wallet <br>
-                999,999,999.99
+    </header>
+   
+    <div class="dashboard-container">
+        <aside class="sidebar">
+            <h2>Menu</h2>
+            <ul>
+                <li><a href="#analytics">Analytics</a></li>
+                <li><a href="#tasks">Tasks</a></li>
+                <li><a href="#notifications">Notifications</a></li>
+            </ul>
+        </aside>
+       
+        <main class="main-content">
+            <div class="content">
+                <div class="left-section">
+                    <div class="block">Wallet <br> 999,999,999.99</div>
+                    <div class="block">Transaction</div>
+                    <div class="block">Summary/Graph/Stats</div>
+                </div>
+                <div class="right-section">
+                    <div class="block">CATEGORIES</div>
+                </div>
             </div>
-            <div class="block">
-                Transaction
-            </div>
-            <div class="block">
-                Summary/Graph/Stats
-            </div>
-        </div>
-        <div class="right-section">
-            CATEGORIES
-        </div>
+        </main>
     </div>
 </body>
 </html>
