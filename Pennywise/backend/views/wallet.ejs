@@ -65,9 +65,10 @@
         .sidebar {
             width: 250px;
             background: #1a1a1a;
-            padding: 20px;
+            padding: 40px;
             transition: width 0.3s ease;
             border-right: 3px solid #ff007f;
+            height: 500px;
         }
         .sidebar h2 {
             color: #ff007f;
@@ -104,7 +105,7 @@
             text-align: center;
             border: 2px solid #ff007f;
             margin-bottom: 10px;
-            margin-right: 650px;
+            margin-right: 750px;
             margin-top: -10px;
         }
         .wallet-balance {
@@ -115,20 +116,23 @@
             width: 400px;
             text-align: right;
             border: 2px solid #ff007f;
-            margin-bottom: 500px;
-            margin-left: 365px;
+            margin-bottom: 50px;
+            margin-top: -45px;;
+            margin-left: 315px;
             display: flex;
             gap: -100px;
+            justify-content: space-between;
         }
         .transaction-history {
             background: #1a1a1a;
-            padding: 1.5rem;
+            padding: 2rem;
             border-radius: 10px;
             box-shadow: 0 4px 10px rgba(255, 0, 127, 0.5);
             width: 400px;
             text-align: left;
             border: 2px solid #ff007f;
-            margin-right: 650px;
+            margin-right: 750px;
+            margin-top: 10px;
         }
         .transaction-history h2 {
             color: #ff007f;
@@ -171,6 +175,34 @@
         .wallet-balance button:hover {
             background: #f954a6;
         }
+        .current-balance {
+            background: #1a1a1a;
+            padding: 2rem;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(255, 0, 127, 0.5);
+            width: 400px;
+            text-align: left;
+            border: 2px solid #ff007f;
+            display: flex;
+            margin-bottom: 10px;
+            margin-right: -50px;
+            margin-top: -123px;
+            margin-left: 30px;
+            height: 110px;
+         }
+         .logout-button {
+            background-color: #ff007f;
+            background: #ff007f;
+            color: white;
+            padding: 5px 10px;
+            text-decoration: none;
+            border-radius: 5px;
+            margin-bottom: 10px;
+        }   
+        .logout-button:hover {
+            background-color: #090909;
+            border: 1px solid #ff007f;
+        }
     </style>
 </head>
 <body>
@@ -184,10 +216,10 @@
                 <li><a href="/notes">Notes</a></li>
                 <li><a href="/savings">Savings</a></li>
                 <li><a href="/wallet">Wallet</a></li>
+                <li><a href="/logout" class="logout-button">Logout</a></li>
             </ul>
         </nav>
     </header>
-   
     <div class="dashboard-container">
         <aside class="sidebar">
             <h2>Menu</h2>
@@ -202,6 +234,9 @@
             <div class="wallet">
                 <h2>Wallet Balance</h2>
                 <p>$1,250.00</p>
+            </div>
+            <div class="current-balance">
+                <h2>Current Balance</h2>
             </div>
             <div class="transaction-history">
                 <h2>Transaction History</h2>
@@ -219,12 +254,10 @@
         <div class="add-form">
             <input type="text" id="Amount" placeholder="Enter Value"> 
         </div>
-        <button type="submit">Add Balance</button>
-    </div>
-    
+        <button type="submit">Add Balance</button> 
+        </div>
     <footer>
         <p>&copy; 2025 Your Company. All rights reserved.</p>
-        <p>Privacy Policy | Terms of Service</p>
     </footer>
 </body>
 </html>
