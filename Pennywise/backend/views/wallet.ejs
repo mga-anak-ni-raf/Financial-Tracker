@@ -498,6 +498,28 @@
                     </div>
         </main>
     </div>
+    <script>
+        // Initialize the balance
+let currentBalance = 0;
+
+// Function to update the balance
+function updateBalance() {
+    const amountInput = document.getElementById('Amount');
+    const amount = parseFloat(amountInput.value);
+
+    // Check if the input is a valid number
+    if (!isNaN(amount)) {
+        currentBalance += amount; // Update the balance
+        document.getElementById('balance').innerText = currentBalance.toFixed(2); // Update the displayed balance
+        amountInput.value = ''; // Clear the input field
+    } else {
+        alert('Please enter a valid number.'); // Alert for invalid input
+    }
+}
+
+// Add event listener to the button
+document.getElementById('addBalanceButton').addEventListener('click', updateBalance);
+    </script>
     <footer>
         <p>&copy; 2025 Your Company. All rights reserved.</p>
     </footer>

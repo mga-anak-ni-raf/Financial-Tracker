@@ -54,8 +54,8 @@ app.get("/homepage", requireLogin, (req, res) => {
 });
 
 // Login Page
-app.get("/login", (req, res) => {
-  res.render("login");
+app.get("/index", (req, res) => {
+  res.render("index");
 });
 
 //wallet page
@@ -76,17 +76,17 @@ app.get("/calendar", requireLogin, (req, res) => {
 });
 
 // Signup Page
-app.get("/signup", (req, res) => {
-  res.render("signup");
+app.get("/index", (req, res) => {
+  res.render("index");
 });
 
 // Redirect root to login page
 app.get("/", (req, res) => {
-  res.redirect("/login");
+  res.redirect("/index");
 });
 
 // **Signup Route**
-app.post("/signup", async (req, res) => {
+app.post("/index", async (req, res) => {
   const { username, password } = req.body;
 
   if (!username || !password) {
@@ -118,7 +118,7 @@ app.post("/signup", async (req, res) => {
 });
 
 // **Login Route**
-app.post("/login", async (req, res) => {
+app.post("/index", async (req, res) => {
   const { username, password } = req.body;
 
   if (!username || !password) {
