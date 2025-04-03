@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>omai wallet</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f4f4f9;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            text-align: center;
+        }
+        label {
+            display: block;
+            margin: 10px 0 5px;
+        }
+        input[type="number"], input[type="text"], textarea {
+            padding: 10px;
+            width: 100%;
+            font-size: 16px;
+            border-radius: 5px;
+            border: 1px solid #ddd;
+            margin-bottom: 10px;
+        }
+        button {
+            padding: 10px 20px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-top: 20px;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        .result, .transactions, .savings, .debts {
+            margin-top: 20px;
+            text-align: center;
+        }
+        .result p, .transactions p, .savings p, .debts p {
+            font-size: 18px;
+        }
+        .transaction-list, .debt-list {
+            margin-top: 20px;
+            text-align: left;
+        }
+        .transaction-item, .debt-item {
+            background-color: #f9f9f9;
+            margin: 10px 0;
+            padding: 10px;
+            border-radius: 5px;
+            box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+        }
+        .progress-bar-container {
+            margin-top: 10px;
+            background-color: #ddd;
+            height: 20px;
+            width: 100%;
+            border-radius: 10px;
+        }
+        .progress-bar {
+            background-color: #4CAF50;
+            height: 100%;
+            border-radius: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Budget Planner</h1>
+        
+        <!-- Monthly Budget Input -->
+        <label for="monthlyBudget">Enter your monthly budget:</label>
+        <input type="number" id="monthlyBudget" placeholder="Enter amount" />
+        <button onclick="initializeBudget()">Set Budget</button>
+
+        <div class="result" id="result"></div>
+
+        <hr>
+
+        <!-- Transaction Recording -->
+        <h2>Record a Transaction</h2>
+        <label for="transactionName">Transaction Name:</label>
+        <input type="text" id="transactionName" placeholder="Transaction name" />
+        <label for="transactionCost">Cost (₱):</label>
+        <input type="number" id="transactionCost" placeholder="Transaction cost" />
+        <label for="transactionDescription">Description:</label>
+        <textarea id="transactionDescription" placeholder="Short description"></textarea>
+        <button onclick="addTransaction()">Add Transaction</button>
+
+        <div class="transactions">
+            <h3>Transaction List</h3>
+            <div class="transaction-list" id="transactionList"></div>
+        </div>
+
+        <hr>
+
+        <!-- Savings Goal Input -->
+        <h2>Set a Savings Goal</h2>
+        <label for="savingsGoalAmount">Savings Goal (₱):</label>
+        <input type="number" id="savingsGoalAmount" placeholder="Enter savings goal amount" />
+        <label for="savingsContribution">Contribution (₱):</label>
+        <input type="number" id="savingsContribution" placeholder="Enter savings contribution" />
+        <button onclick="addSavings()">Add Savings Contribution</button>
+
+        <div class="savings">
+            <h3>Savings Progress</h3>
+            <p>Target Savings: ₱<span id="savingsGoalDisplay">0</span></p>
+            <p>Saved: ₱<span id="savingsSaved">0</span></p>
+            <div class="progress-bar-container">
+                <div id="progressBar" class="progress-bar" style="width: 0%"></div>
+            </div>
+        </div>
+
+        <hr>
+
+        <!-- Debt Input -->
+        <h2>Record a Debt</h2>
+        <label for="debtName">Debt Name:</label>
+        <input type="text" id="debtName" placeholder="Debt name" />
+        <label for="debtAmount">Principal Amount (₱):</label>
+        <input type="number" id="debtAmount" placeholder="Debt principal amount" />
+        <label for="debtInterest">Interest Rate (%):</label>
+        <input type="number" id="debtInterest" placeholder="Interest rate" />
+        <label for="debtDueDate">Due Date:</label>
+        <input type="date" id="debtDueDate" />
+        <button onclick="addDebt()">Add Debt</button>
+
+        <div class="debts">
+            <h3>Debts & Liabilities</h3>
+            <div class="debt-list" id="debtList"></div>
+        </div>
+    </div>
+
+    <script>
+        let transactions = [];
+        let debts = [];
+        let savingsGoal = 0;
+        let savingsSaved = 0;
+        let monthlyBudget = 0;
+        let weeklyBudget = 0;
+        let dailyBudget = 0;
+        let totalBudget = 0;
+
+        // Initialize the Budget
+        function initializeBudget() {
+            monthlyBudget = parseFloat(document.getElementById("monthlyBudget").value);
+            
+            if (isNaN(monthlyBudget) || monthlyBudget <= 0) {
+                alert("Please enter a valid budget amount.");
+                return;
+            }
+
+            weeklyBudget = (monthlyBudget / 4).toFixed(2);
+            dailyBudget = (monthlyBudget / 30).toFixed(2);
+            totalBudget = monthlyBudget;
+
+            // Display the results
+            const resultDiv = document.getElementById("result");
+            resultDiv.innerHTML = `
+                <p>Monthly Budget: ₱${monthlyBudget.toFixed(2)}</p>
+                <p>Weekly Budget: ₱${weeklyBudget}</p>
+                <p>Daily Budget: ₱${dailyBudget}</p>
+                <p>Total Budget: ₱${totalBudget.toFixed(2)}</p>
+            `;
+        }
+
+        // Add a new transaction to the transaction list
+        function addTransaction() {
+            const name = document.getElementById("transactionName").value;
+            const cost = parseFloat(document.getElementById("transactionCost").value);
+            const description = document.getElementById("transactionDescription").value;
+            const currentDate = new Date();
+            
+            if (name === "" || isNaN(cost) || cost <= 0 || description === "") {
+                alert("Please fill in all fields with valid values.");
+                return;
+            }
+
+            const dateTime = currentDate.toLocaleString();
+            const newTransaction = { name, cost, description, dateTime };
+            transactions.push(newTransaction);
+
+            totalBudget -= cost;  // Deduct from total budget
+            displayTransactions();
+            updateBudgetDisplay();
+        }
+
+        // Display transactions
+        function displayTransactions() {
+            const transactionListDiv = document.getElementById("transactionList");
+            transactionListDiv.innerHTML = "";
+
+            if (transactions.length === 0) {
+                transactionListDiv.innerHTML = "<p>No transactions recorded yet.</p>";
+                return;
+            }
+
+            transactions.forEach(transaction => {
+                const transactionItem = document.createElement("div");
+                transactionItem.classList.add("transaction-item");
+
+                transactionItem.innerHTML = `
+                    <p><strong>${transaction.name}</strong> - ₱${transaction.cost}</p>
+                    <p>${transaction.description}</p>
+                    <p><small>Recorded on: ${transaction.dateTime}</small></p>
+                `;
+
+                transactionListDiv.appendChild(transactionItem);
+            });
+        }
+
+        // Update the budget display after a transaction
+        function updateBudgetDisplay() {
+            const resultDiv = document.getElementById("result");
+            resultDiv.innerHTML = `
+                <p>Monthly Budget: ₱${monthlyBudget.toFixed(2)}</p>
+                <p>Weekly Budget: ₱${weeklyBudget}</p>
+                <p>Daily Budget: ₱${dailyBudget}</p>
+                <p>Total Budget: ₱${totalBudget.toFixed(2)}</p>
+            `;
+        }
+
+        // Add savings contribution
+        function addSavings() {
+            const goalAmount = parseFloat(document.getElementById("savingsGoalAmount").value);
+            const contribution = parseFloat(document.getElementById("savingsContribution").value);
+            
+            if (isNaN(goalAmount) || goalAmount <= 0) {
+                alert("Please enter a valid savings goal amount.");
+                return;
+            }
+            
+            if (isNaN(contribution) || contribution <= 0) {
+                alert("Please enter a valid savings contribution.");
+                return;
+            }
+
+            savingsGoal = goalAmount;
+            savingsSaved += contribution;
+
+            document.getElementById("savingsGoalDisplay").innerText = savingsGoal.toFixed(2);
+            document.getElementById("savingsSaved").innerText = savingsSaved.toFixed(2);
+
+            const progressPercent = Math.min((savingsSaved / savingsGoal) * 100, 100);
+            document.getElementById("progressBar").style.width = progressPercent + "%";
+        }
+
+        // Add a new debt to the debt list
+        function addDebt() {
+            const name = document.getElementById("debtName").value;
+            const amount = parseFloat(document.getElementById("debtAmount").value);
+            const interest = parseFloat(document.getElementById("debtInterest").value);
+            const dueDate = document.getElementById("debtDueDate").value;
+            
+            if (name === "" || isNaN(amount) || amount <= 0) {
+                alert("Please fill in all fields with valid values.");
+                return;
+            }
+
+            const newDebt = { name, amount, interest, dueDate };
+            debts.push(newDebt);
+
+            totalBudget -= amount;  // Deduct from total budget
+            displayDebts();
+            updateBudgetDisplay();
+        }
+
+        // Remove a debt (clear it from the list)
+        function clearDebt(index) {
+            const debtToRemove = debts[index];
+            totalBudget += debtToRemove.amount;  // Add back the principal amount to total budget
+            debts.splice(index, 1);  // Remove the debt from the list
+            displayDebts();
+            updateBudgetDisplay();
+        }
+
+        // Display debts
+        function displayDebts() {
+            const debtListDiv = document.getElementById("debtList");
+            debtListDiv.innerHTML = "";
+
+            if (debts.length === 0) {
+                debtListDiv.innerHTML = "<p>No debts recorded yet.</p>";
+                return;
+            }
+
+            debts.forEach((debt, index) => {
+                const debtItem = document.createElement("div");
+                debtItem.classList.add("debt-item");
+
+                debtItem.innerHTML = `
+                    <p><strong>${debt.name}</strong> - ₱${debt.amount}</p>
+                    <p>Interest Rate: ${debt.interest}%</p>
+                    <p>Due Date: ${debt.dueDate}</p>
+                    <button onclick="clearDebt(${index})">Clear Debt</button>
+                `;
+
+                debtListDiv.appendChild(debtItem);
+            });
+        }
+    </script>
+</body>
+</html>
