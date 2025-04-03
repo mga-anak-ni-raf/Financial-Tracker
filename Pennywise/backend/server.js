@@ -19,7 +19,6 @@ db.connect()
   .then(() => console.log("Connected to PostgreSQL"))
   .catch((err) => console.error("Database connection error:", err));
 
-
 // Middleware
 app.use(express.static("public")); // For serving CSS and other static files
 app.use(express.urlencoded({ extended: true }));
@@ -41,7 +40,7 @@ app.set("views", path.join(__dirname, "views"));
 // Authentication middleware
 const requireLogin = (req, res, next) => {
   if (!req.session.username) {
-    return res.redirect("/login");
+    return res.redirect("/index");
   }
   next();
 };
@@ -53,29 +52,17 @@ app.get("/homepage", requireLogin, (req, res) => {
   res.render("homepage", { username: req.session.username });
 });
 
-// Login Page
-app.get("/index", (req, res) => {
-  res.render("index");
-});
-
-//wallet page
-app.get("/wallet", (req, res) => {
+// Wallet page
+app.get("/wallet", requireLogin, (req, res) => {
   res.render("wallet");
 });
 
-// Logout
-app.get("/logout", (req, res) => {
-  req.session.destroy(() => {
-    res.redirect("/login");
-  });
-});
-
-// Calendar Page (Protected)
+// Calendar page (Protected)
 app.get("/calendar", requireLogin, (req, res) => {
   res.render("calendar", { username: req.session.username });
 });
 
-// Signup Page
+// Login & Signup Page
 app.get("/index", (req, res) => {
   res.render("index");
 });
@@ -85,8 +72,15 @@ app.get("/", (req, res) => {
   res.redirect("/index");
 });
 
+// Logout
+app.get("/logout", (req, res) => {
+  req.session.destroy(() => {
+    res.redirect("/index");
+  });
+});
+
 // **Signup Route**
-app.post("/index", async (req, res) => {
+app.post("/signup", async (req, res) => {
   const { username, password } = req.body;
 
   if (!username || !password) {
@@ -118,7 +112,7 @@ app.post("/index", async (req, res) => {
 });
 
 // **Login Route**
-app.post("/index", async (req, res) => {
+app.post("/login", async (req, res) => {
   const { username, password } = req.body;
 
   if (!username || !password) {
@@ -144,9 +138,8 @@ app.post("/index", async (req, res) => {
     // Store session data
     req.session.username = user.username;
 
-
-     // ✅ Send JSON instead of redirecting
-     res.json({ success: true, redirect: "/homepage" });
+    // ✅ Send JSON instead of redirecting
+    res.json({ success: true, redirect: "/homepage" });
   } catch (error) {
     console.error("Login error:", error);
     res.status(500).json({ message: "Server error during login." });
