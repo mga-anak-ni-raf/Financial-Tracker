@@ -169,14 +169,26 @@
             dailyBudget = (monthlyBudget / 30).toFixed(2);
             totalBudget = monthlyBudget;
 
-            // Display the results
-            const resultDiv = document.getElementById("result");
-            resultDiv.innerHTML = `
-                <p>Monthly Budget: ₱${monthlyBudget.toFixed(2)}</p>
-                <p>Weekly Budget: ₱${weeklyBudget}</p>
-                <p>Daily Budget: ₱${dailyBudget}</p>
-                <p>Total Budget: ₱${totalBudget.toFixed(2)}</p>
-            `;
+            // Send the budget data to the backend API
+            fetch('/api/budget', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ 
+                    monthlyBudget, 
+                    weeklyBudget, 
+                    dailyBudget 
+                }),
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log('Budget set:', data);
+                updateBudgetDisplay();
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
         }
 
         // Add a new transaction to the transaction list
@@ -185,19 +197,32 @@
             const cost = parseFloat(document.getElementById("transactionCost").value);
             const description = document.getElementById("transactionDescription").value;
             const currentDate = new Date();
-            
+
             if (name === "" || isNaN(cost) || cost <= 0 || description === "") {
                 alert("Please fill in all fields with valid values.");
                 return;
             }
 
             const dateTime = currentDate.toLocaleString();
-            const newTransaction = { name, cost, description, dateTime };
-            transactions.push(newTransaction);
 
-            totalBudget -= cost;  // Deduct from total budget
-            displayTransactions();
-            updateBudgetDisplay();
+            // Send the transaction data to the backend API
+            fetch('/api/transaction', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ name, cost, description, dateTime }),
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log('Transaction added:', data);
+                totalBudget -= cost;  // Deduct from total budget
+                displayTransactions();
+                updateBudgetDisplay();
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
         }
 
         // Display transactions
@@ -258,6 +283,22 @@
 
             const progressPercent = Math.min((savingsSaved / savingsGoal) * 100, 100);
             document.getElementById("progressBar").style.width = progressPercent + "%";
+
+            // Send the savings contribution to the backend API
+            fetch('/api/savings', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ goalAmount, contribution }),
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log('Savings contribution added:', data);
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
         }
 
         // Add a new debt to the debt list
@@ -273,20 +314,25 @@
             }
 
             const newDebt = { name, amount, interest, dueDate };
-            debts.push(newDebt);
 
-            totalBudget -= amount;  // Deduct from total budget
-            displayDebts();
-            updateBudgetDisplay();
-        }
-
-        // Remove a debt (clear it from the list)
-        function clearDebt(index) {
-            const debtToRemove = debts[index];
-            totalBudget += debtToRemove.amount;  // Add back the principal amount to total budget
-            debts.splice(index, 1);  // Remove the debt from the list
-            displayDebts();
-            updateBudgetDisplay();
+            // Send the debt data to the backend API
+            fetch('/api/debt', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(newDebt),
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log('Debt added:', data);
+                totalBudget -= amount;  // Deduct from total budget
+                displayDebts();
+                updateBudgetDisplay();
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
         }
 
         // Display debts
@@ -299,7 +345,7 @@
                 return;
             }
 
-            debts.forEach((debt, index) => {
+            debts.forEach(debt => {
                 const debtItem = document.createElement("div");
                 debtItem.classList.add("debt-item");
 
@@ -307,7 +353,6 @@
                     <p><strong>${debt.name}</strong> - ₱${debt.amount}</p>
                     <p>Interest Rate: ${debt.interest}%</p>
                     <p>Due Date: ${debt.dueDate}</p>
-                    <button onclick="clearDebt(${index})">Clear Debt</button>
                 `;
 
                 debtListDiv.appendChild(debtItem);

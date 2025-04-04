@@ -3,525 +3,361 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Financial Tracker</title>
+    <title>omai wallet</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Arial', sans-serif;
-        }
         body {
-            display: flex;
-            flex-direction: column;
-            height: 100vh;
-            background: linear-gradient(to right,#f0757575, #cbf6db, #f0757575);
-            padding-top: 70px;
-            padding-bottom: 50px;
-            color: rgb(255, 255, 255);
-        }
-        header, footer {
-            width: 100%;
-            padding: 1rem;
-            background: #1a1a1a;
-            color: white;
-            text-align: center;
-            position: fixed;
-            left: 0;
-        }
-        header {
-            top: 0;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 1rem 10%;
-            border-bottom: 3px solid #000000;
-        }
-        nav ul {
-            list-style: none;
-            display: flex;
-            gap: 15px;
-        }
-        nav ul li a {
-            color: white;
-            text-decoration: none;
-            font-weight: bold;
-            transition: color 0.3s;
-        }
-        nav ul li a:hover {
-            color: #ff007f;
-        }
-        footer {
-            bottom: 0;
-            display: flex;
-            justify-content: space-between;
-            padding: 1rem 10%;
-            border-top: 3px solid #ff007f;
-        }
-        .dashboard-container {
-            display: flex;
-            flex: 1;
-        }
-        .sidebar {
-            width: 250px;
-            background: #1a1a1a;
-            padding: 40px;
-            transition: width 0.3s ease;
-            border-right: 3px solid #ff007f;
-            height: 500px;
-           
-        }
-        .sidebar h2 {
-            color: #ff007f;
-            margin-bottom: 10px;
-        }
-        .sidebar ul {
-            list-style: none;
-        }
-        .sidebar ul li {
-            margin: 20px 0;
-        }
-        .sidebar ul li a {
-            color: white;
-            text-decoration: none;
-            font-weight: bold;
-            transition: color 0.3s;
-        }
-        .sidebar ul li a:hover {
-            color: #ff007f;
-        }
-        .main-content {
-            flex: 1;
+            font-family: Arial, sans-serif;
+            margin: 0;
             padding: 20px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
+            background-color: #f4f4f9;
         }
-        .wallet {
-            background: #1a1a1a;
-            padding: 2rem;
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: white;
+            padding: 20px;
             border-radius: 10px;
-            width: 400px;
-            text-align: center;
-            border: 2px solid #000000;
-            margin-bottom: 10px;
-            margin-right: 750px;
-            margin-top: -10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
         }
-        .wallet-balance {
-            background: #1a1a1a;
-            padding: 2rem;
-            border-radius: 10px;
-            box-shadow: 0 4px 10px rgb(253, 253, 253);
-            width: 400px;
-            text-align: right;
-            border: 2px solid #000000;
-            margin-bottom: 50px;
-            margin-top: -45px;;
-            margin-left: 315px;
-            display: flex;
-            gap: -100px;
-            justify-content: space-between;
-        }
-        .transaction-history {
-            background: #1a1a1a;
-            padding: 2rem;
-            border-radius: 10px;
-            width: 400px;
-            text-align: left;
-            border: 2px solid #ff007f;
-            margin-right: 750px;
-            margin-top: 10px;
-        }
-        .transaction-history h2 {
-            color: #ffffff;
-            margin-bottom: 10px;
+        h1 {
             text-align: center;
         }
-        .transaction-list {
-            list-style: none;
+        label {
+            display: block;
+            margin: 10px 0 5px;
         }
-        .transaction-list li {
-            background: #333;
+        input[type="number"], input[type="text"], textarea {
             padding: 10px;
+            width: 100%;
+            font-size: 16px;
             border-radius: 5px;
+            border: 1px solid #ddd;
             margin-bottom: 10px;
-            border-left: 5px solid #ff007f;
         }
-        .add-form input {
-            width: 80%;
-            padding: 10px;
-            margin: 10px 0;
-            border: 1px solid #000000;
-            border-radius: 5px;
-            background: #333;
+        button {
+            padding: 10px 20px;
+            background-color: #4CAF50;
             color: white;
-            margin-right: 150px;
-        }
-        .wallet-balance button {
-            width: 25%;
-            padding: 5px;
             border: none;
-            background: #ff007f;
-            border: 1px solid #ff007f;
-            color: white;
             border-radius: 5px;
             cursor: pointer;
-            transition: background 0.3s;
-            font-weight: bold;
-            margin-right: -1px;
-        }
-        .wallet-balance button:hover {
-            background: #f954a6;
-        }
-        
-         .logout-button {
-            background-color: #ff007f;
-            background: #ff007f;
-            color: white;
-            padding: 5px 10px;
-            text-decoration: none;
-            border-radius: 5px;
-            margin-bottom: 10px;
-        }   
-        .logout-button:hover {
-            background-color: #fffafa;
-            border: 1px solid #ff007f;
-        }
-        .Daily-budget {
-            padding: 2rem;
-            border-radius: 10px;
-            box-shadow: 0 4px 10px rgb(255, 255, 255);
-            width: 700px;
-            text-align: center;
-            border: 2px solid #ff007f;
+            font-size: 16px;
             margin-top: 20px;
-            position: absolute;
-            right: 50px;
-            top: 80px;
-
         }
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 10px;
+        button:hover {
+            background-color: #45a049;
         }
-        th, td {
-            border: 1px solid #ff007f;
-            padding: 10px;
+        .result, .transactions, .savings, .debts {
+            margin-top: 20px;
             text-align: center;
         }
-        th {
-            background: #ff007f;
+        .result p, .transactions p, .savings p, .debts p {
+            font-size: 18px;
         }
-        .edit-budget {
-            margin-top: 10px;
-            padding: 10px;
-            background: #ff007f;
-            color: white;
-            border: none;
-            cursor: pointer;
-            border-radius: 5px;
-        }
-        .edit-budget:hover {
-            background: #f954a6;
-        }
-        .wallet-balance {
-            background: #1a1a1a;
-            padding: 2rem;
-            border-radius: 10px;
-            box-shadow: 0 4px 10px rgba(255, 0, 127, 0.5);
-            width: 400px;
-            text-align: right;
-            border: 2px solid #000000;
-            margin-bottom: 50px;
-            margin-top: -45px;;
-            margin-left: 315px;
-            display: flex;
-            gap: -100px;
-            justify-content: space-between;
-        }
-        .transaction-history {
-            background: #1a1a1a;
-            padding: 2rem;
-            border-radius: 10px;
-            box-shadow: 0 4px 10px rgba(255, 0, 127, 0.5);
-            width: 400px;
+        .transaction-list, .debt-list {
+            margin-top: 20px;
             text-align: left;
-            border: 2px solid #ff007f;
-            margin-right: 750px;
-            margin-top: 10px;
         }
-        .transaction-history h2 {
-            color: #ff007f;
-            margin-bottom: 10px;
-            text-align: center;
-        }
-        .transaction-list {
-            list-style: none;
-        }
-        .transaction-list li {
-            background: #333;
-            padding: 10px;
-            border-radius: 5px;
-            margin-bottom: 10px;
-            border-left: 5px solid #ff007f;
-        }
-        .add-form input {
-            width: 80%;
-            padding: 10px;
+        .transaction-item, .debt-item {
+            background-color: #f9f9f9;
             margin: 10px 0;
-            border: 1px solid #000000;
+            padding: 10px;
             border-radius: 5px;
-            background: #333;
-            color: white;
-            margin-right: 150px;
+            box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
         }
-        .wallet-balance button {
-            width: 25%;
-            padding: 5px;
-            border: none;
-            background: #ff007f;
-            border: 1px solid #ff007f;
-            color: white;
-            border-radius: 5px;
-            cursor: pointer;
-            transition: background 0.3s;
-            font-weight: bold;
-            margin-right: -1px;
-        }
-        .wallet-balance button:hover {
-            background: #f954a6;
-        }
-        
-         .logout-button {
-            background-color: #ff007f;
-            background: #ff007f;
-            color: white;
-            padding: 5px 10px;
-            text-decoration: none;
-            border-radius: 5px;
-            margin-bottom: 10px;
-        }   
-        .logout-button:hover {
-            background-color: #090909;
-            border: 1px solid #ff007f;
-        }
-        .Weekly-budget {
-            padding: 2rem;
-            border-radius: 10px;
-            box-shadow: 0 4px 10px rgba(255, 0, 127, 0.5);
-            width: 700px;
-            text-align: center;
-            border: 2px solid #ff007f;
-            margin-top: 350px;
-            position: absolute;
-            right: 50px;
-            top: 80px;
-        }
-        table {
+        .progress-bar-container {
+            margin-top: 10px;
+            background-color: #ddd;
+            height: 20px;
             width: 100%;
-            border-collapse: collapse;
-            margin-top: 10px;
-        }
-        th, td {
-            border: 1px solid #ff007f;
-            padding: 10px;
-            text-align: center;
-        }
-        th {
-            background: #ff007f;
-        }
-        .edit-budget {
-            margin-top: 10px;
-            padding: 10px;
-            background: #ff007f;
-            color: white;
-            border: none;
-            cursor: pointer;
-            border-radius: 5px;
-        }
-        .edit-budget:hover {
-            background: #f954a6;
-        }
-     .Monthly-budget {
-            padding: 2rem;
             border-radius: 10px;
-            box-shadow: 0 4px 10px rgba(255, 0, 127, 0.5);
-            width: 700px;
-            text-align: center;
-            border: 2px solid #ff007f;
-            margin-top: 680px;
-            position: absolute;
-            right: 50px;
-            top: 80px;
         }
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 10px;
-        }
-        th, td {
-            border: 1px solid #ff007f;
-            padding: 10px;
-            text-align: center;
-        }
-        th {
-            background: #ff007f;
-        }
-        .edit-budget {
-            margin-top: 10px;
-            padding: 10px;
-            background: #ff007f;
-            color: white;
-            border: none;
-            cursor: pointer;
-            border-radius: 5px;
-        }
-        .edit-budget:hover {
-            background: #f954a6;
+        .progress-bar {
+            background-color: #4CAF50;
+            height: 100%;
+            border-radius: 10px;
         }
     </style>
 </head>
 <body>
-    <header>
-        <h1>Ctrl.save</h1>
-    </header>
-    <div class="dashboard-container">
-        <aside class="sidebar">
-            <h2>Menu</h2>
-            <ul>
-                <li><a href="/homepage">Home</a></li>
-                <li><a href="/calendar">Calendar</a></li>
-                <li><a href="/stats">Stats</a></li>
-                <li><a href="/notes">Notes</a></li>
-                <li><a href="/savings">Savings</a></li>
-                <li><a href="/wallet">Wallet</a></li>
-                <li><a href="/logout" class="logout-button">Logout</a></li>
-            </ul>
-        </aside>
-       
-        <main class="main-content">
-            <div class="wallet">
-                <h2>Wallet Balance</h2>
-                <p>$1,250.00</p>
-            </div>
-            <div class="transaction-history">
-                <h2>Transaction History</h2>
-                <ul class="transaction-list">
-                    <li>+ $500.00 - Salary</li>
-                    <li>- $50.00 - Grocery</li>
-                    <li>- $100.00 - Utility Bills</li>
-                    <li>+ $200.00 - Freelance Payment</li>
-                </ul>
-            </div>
-        </main>
-    </div>
-   
-    <div class="wallet-balance">
-        <div class="add-form">
-            <input type="text" id="Amount" placeholder="Enter Value"> 
-        </div>
-        <button type="submit">Add Balance</button> 
+    <div class="container">
+        <h1>Budget Planner</h1>
+        
+        <!-- Monthly Budget Input -->
+        <label for="monthlyBudget">Enter your monthly budget:</label>
+        <input type="number" id="monthlyBudget" placeholder="Enter amount" />
+        <button onclick="initializeBudget()">Set Budget</button>
+
+        <div class="result" id="result"></div>
+
+        <hr>
+
+        <!-- Transaction Recording -->
+        <h2>Record a Transaction</h2>
+        <label for="transactionName">Transaction Name:</label>
+        <input type="text" id="transactionName" placeholder="Transaction name" />
+        <label for="transactionCost">Cost (₱):</label>
+        <input type="number" id="transactionCost" placeholder="Transaction cost" />
+        <label for="transactionDescription">Description:</label>
+        <textarea id="transactionDescription" placeholder="Short description"></textarea>
+        <button onclick="addTransaction()">Add Transaction</button>
+
+        <div class="transactions">
+            <h3>Transaction List</h3>
+            <div class="transaction-list" id="transactionList"></div>
         </div>
 
-     <div class="Daily-budget">
-            <h2>Daily Budget</h2>
-                <table id="budgetTable">
-                    <tr>
-                        <th>Category</th>
-                        <th>Amount</th>
-                    </tr>
-                    <tr>
-                        <td>Food</td>
-                        <td>$200</td>
-                    </tr>
-                    <tr>
-                        <td>Transport</td>
-                        <td>$50</td>
-                    </tr>
-                    <tr>
-                        <td>Entertainment</td>
-                        <td>$100</td>
-                    </tr>
-                </table>
-                <button class="edit-budget" onclick="editBudget()">Edit Budget</button>
-                <button class="edit-budget" id="saveButton" onclick="saveBudget()" style="display:none;">Save Budget</button>
+        <hr>
+
+        <!-- Savings Goal Input -->
+        <h2>Set a Savings Goal</h2>
+        <label for="savingsGoalAmount">Savings Goal (₱):</label>
+        <input type="number" id="savingsGoalAmount" placeholder="Enter savings goal amount" />
+        <label for="savingsContribution">Contribution (₱):</label>
+        <input type="number" id="savingsContribution" placeholder="Enter savings contribution" />
+        <button onclick="addSavings()">Add Savings Contribution</button>
+
+        <div class="savings">
+            <h3>Savings Progress</h3>
+            <p>Target Savings: ₱<span id="savingsGoalDisplay">0</span></p>
+            <p>Saved: ₱<span id="savingsSaved">0</span></p>
+            <div class="progress-bar-container">
+                <div id="progressBar" class="progress-bar" style="width: 0%"></div>
             </div>
+        </div>
 
-            <div class="Weekly-budget">
-                <h2>Weekly Budget</h2>
-                    <table id="budgetTable">
-                        <tr>
-                            <th>Category</th>
-                            <th>Amount</th>
-                        </tr>
-                        <tr>
-                            <td>Food</td>
-                            <td>$200</td>
-                        </tr>
-                        <tr>
-                            <td>Transport</td>
-                            <td>$50</td>
-                        </tr>
-                        <tr>
-                            <td>Entertainment</td>
-                            <td>$100</td>
-                        </tr>
-                    </table>
-                    <button class="edit-budget" onclick="editBudget()">Edit Budget</button>
-                    <button class="edit-budget" id="saveButton" onclick="saveBudget()" style="display:none;">Save Budget</button>
-                </div>
+        <hr>
 
-                <div class="Monthly-budget">
-                    <h2>Monthly Budget</h2>
-                        <table id="budgetTable">
-                            <tr>
-                                <th>Category</th>
-                                <th>Amount</th>
-                            </tr>
-                            <tr>
-                                <td>Food</td>
-                                <td>$200</td>
-                            </tr>
-                            <tr>
-                                <td>Transport</td>
-                                <td>$50</td>
-                            </tr>
-                            <tr>
-                                <td>Entertainment</td>
-                                <td>$100</td>
-                            </tr>
-                        </table>
-                        <button class="edit-budget" onclick="editBudget()">Edit Budget</button>
-                        <button class="edit-budget" id="saveButton" onclick="saveBudget()" style="display:none;">Save Budget</button>
-                    </div>
-        </main>
+        <!-- Debt Input -->
+        <h2>Record a Debt</h2>
+        <label for="debtName">Debt Name:</label>
+        <input type="text" id="debtName" placeholder="Debt name" />
+        <label for="debtAmount">Principal Amount (₱):</label>
+        <input type="number" id="debtAmount" placeholder="Debt principal amount" />
+        <label for="debtInterest">Interest Rate (%):</label>
+        <input type="number" id="debtInterest" placeholder="Interest rate" />
+        <label for="debtDueDate">Due Date:</label>
+        <input type="date" id="debtDueDate" />
+        <button onclick="addDebt()">Add Debt</button>
+
+        <div class="debts">
+            <h3>Debts & Liabilities</h3>
+            <div class="debt-list" id="debtList"></div>
+        </div>
     </div>
+
     <script>
-        // Initialize the balance
-let currentBalance = 0;
+        let transactions = [];
+        let debts = [];
+        let savingsGoal = 0;
+        let savingsSaved = 0;
+        let monthlyBudget = 0;
+        let weeklyBudget = 0;
+        let dailyBudget = 0;
+        let totalBudget = 0;
 
-// Function to update the balance
-function updateBalance() {
-    const amountInput = document.getElementById('Amount');
-    const amount = parseFloat(amountInput.value);
+        // Initialize the Budget
+        function initializeBudget() {
+            monthlyBudget = parseFloat(document.getElementById("monthlyBudget").value);
+            
+            if (isNaN(monthlyBudget) || monthlyBudget <= 0) {
+                alert("Please enter a valid budget amount.");
+                return;
+            }
 
-    // Check if the input is a valid number
-    if (!isNaN(amount)) {
-        currentBalance += amount; // Update the balance
-        document.getElementById('balance').innerText = currentBalance.toFixed(2); // Update the displayed balance
-        amountInput.value = ''; // Clear the input field
-    } else {
-        alert('Please enter a valid number.'); // Alert for invalid input
-    }
-}
+            weeklyBudget = (monthlyBudget / 4).toFixed(2);
+            dailyBudget = (monthlyBudget / 30).toFixed(2);
+            totalBudget = monthlyBudget;
 
-// Add event listener to the button
-document.getElementById('addBalanceButton').addEventListener('click', updateBalance);
+            // Send the budget data to the backend API
+            fetch('/api/budget', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ 
+                    monthlyBudget, 
+                    weeklyBudget, 
+                    dailyBudget 
+                }),
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log('Budget set:', data);
+                updateBudgetDisplay();
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+        }
+
+        // Add a new transaction to the transaction list
+        function addTransaction() {
+            const name = document.getElementById("transactionName").value;
+            const cost = parseFloat(document.getElementById("transactionCost").value);
+            const description = document.getElementById("transactionDescription").value;
+            const currentDate = new Date();
+
+            if (name === "" || isNaN(cost) || cost <= 0 || description === "") {
+                alert("Please fill in all fields with valid values.");
+                return;
+            }
+
+            const dateTime = currentDate.toLocaleString();
+
+            // Send the transaction data to the backend API
+            fetch('/api/transaction', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ name, cost, description, dateTime }),
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log('Transaction added:', data);
+                totalBudget -= cost;  // Deduct from total budget
+                displayTransactions();
+                updateBudgetDisplay();
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+        }
+
+        // Display transactions
+        function displayTransactions() {
+            const transactionListDiv = document.getElementById("transactionList");
+            transactionListDiv.innerHTML = "";
+
+            if (transactions.length === 0) {
+                transactionListDiv.innerHTML = "<p>No transactions recorded yet.</p>";
+                return;
+            }
+
+            transactions.forEach(transaction => {
+                const transactionItem = document.createElement("div");
+                transactionItem.classList.add("transaction-item");
+
+                transactionItem.innerHTML = `
+                    <p><strong>${transaction.name}</strong> - ₱${transaction.cost}</p>
+                    <p>${transaction.description}</p>
+                    <p><small>Recorded on: ${transaction.dateTime}</small></p>
+                `;
+
+                transactionListDiv.appendChild(transactionItem);
+            });
+        }
+
+        // Update the budget display after a transaction
+        function updateBudgetDisplay() {
+            const resultDiv = document.getElementById("result");
+            resultDiv.innerHTML = `
+                <p>Monthly Budget: ₱${monthlyBudget.toFixed(2)}</p>
+                <p>Weekly Budget: ₱${weeklyBudget}</p>
+                <p>Daily Budget: ₱${dailyBudget}</p>
+                <p>Total Budget: ₱${totalBudget.toFixed(2)}</p>
+            `;
+        }
+
+        // Add savings contribution
+        function addSavings() {
+            const goalAmount = parseFloat(document.getElementById("savingsGoalAmount").value);
+            const contribution = parseFloat(document.getElementById("savingsContribution").value);
+            
+            if (isNaN(goalAmount) || goalAmount <= 0) {
+                alert("Please enter a valid savings goal amount.");
+                return;
+            }
+            
+            if (isNaN(contribution) || contribution <= 0) {
+                alert("Please enter a valid savings contribution.");
+                return;
+            }
+
+            savingsGoal = goalAmount;
+            savingsSaved += contribution;
+
+            document.getElementById("savingsGoalDisplay").innerText = savingsGoal.toFixed(2);
+            document.getElementById("savingsSaved").innerText = savingsSaved.toFixed(2);
+
+            const progressPercent = Math.min((savingsSaved / savingsGoal) * 100, 100);
+            document.getElementById("progressBar").style.width = progressPercent + "%";
+
+            // Send the savings contribution to the backend API
+            fetch('/api/savings', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ goalAmount, contribution }),
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log('Savings contribution added:', data);
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+        }
+
+        // Add a new debt to the debt list
+        function addDebt() {
+            const name = document.getElementById("debtName").value;
+            const amount = parseFloat(document.getElementById("debtAmount").value);
+            const interest = parseFloat(document.getElementById("debtInterest").value);
+            const dueDate = document.getElementById("debtDueDate").value;
+            
+            if (name === "" || isNaN(amount) || amount <= 0) {
+                alert("Please fill in all fields with valid values.");
+                return;
+            }
+
+            const newDebt = { name, amount, interest, dueDate };
+
+            // Send the debt data to the backend API
+            fetch('/api/debt', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(newDebt),
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log('Debt added:', data);
+                totalBudget -= amount;  // Deduct from total budget
+                displayDebts();
+                updateBudgetDisplay();
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+        }
+
+        // Display debts
+        function displayDebts() {
+            const debtListDiv = document.getElementById("debtList");
+            debtListDiv.innerHTML = "";
+
+            if (debts.length === 0) {
+                debtListDiv.innerHTML = "<p>No debts recorded yet.</p>";
+                return;
+            }
+
+            debts.forEach(debt => {
+                const debtItem = document.createElement("div");
+                debtItem.classList.add("debt-item");
+
+                debtItem.innerHTML = `
+                    <p><strong>${debt.name}</strong> - ₱${debt.amount}</p>
+                    <p>Interest Rate: ${debt.interest}%</p>
+                    <p>Due Date: ${debt.dueDate}</p>
+                `;
+
+                debtListDiv.appendChild(debtItem);
+            });
+        }
     </script>
-    <footer>
-        <p>&copy; 2025 Your Company. All rights reserved.</p>
-    </footer>
 </body>
 </html>
