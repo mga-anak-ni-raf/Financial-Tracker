@@ -4,30 +4,36 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Epilogue:wght@300;400;600;700&display=swap" rel="stylesheet">
+
     <style>
         * {
             margin: 0;
             padding: 0;
-            box-sizing: border-box;
-            font-family: Arial, sans-serif;
         }
         body {
             display: flex;
             flex-direction: column;
             height: 100vh;
-            background: linear-gradient(to right, #f0757575, #cbf6db, #f0757575);
-            color: white;
+            background: linear-gradient(#60d3e4, #5fd4ad);
+            color: rgb(255, 255, 255);
+            font-family: 'Epilogue', sans-serif;
         }
         .top-bar {
-            background: #1a1a1a;
-            padding: 15px 10%;
-            border-bottom: 3px solid #000000;
+            background: #5fd4ad;
+            padding: 40px 10%;
+            border-bottom: 3px solid #5fd4ad;
             display: flex;
             justify-content: space-between;
             align-items: center;
         }
         .top-bar h1 {
             margin: 0;
+        }
+        .logo {
+            width: 50px; /* Adjust the width as needed */
+            height: auto;
+            margin-right: 10px; /* Space between the logo and title */
         }
         .header-right {
             display: flex;
@@ -41,7 +47,7 @@
             transition: color 0.3s;
         }
         .header-right a:hover {
-            color: #ff007f;
+            color: #ffffff;
         }
         .dashboard-container {
             display: flex;
@@ -49,35 +55,50 @@
         }
         .sidebar {
             width: 250px;
-            background: #1a1a1a;
+            background: #60d3e4;
             padding: 20px;
-            transition: width 0.3s ease;
-            border-right: 3px solid #000000;
+            transition: width 0.3s ease, visibility 0s 0.3s; /* Smooth transition for width */
+            border-right: 3px solid #60d3e4;
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            z-index: 1;
         }
         .sidebar h2 {
-            color: #ff007f;
+            color: #60d3e4;
             margin-bottom: 30px;
         }
         .sidebar ul {
             list-style: none;
+            padding-left: 20;
         }
         .sidebar ul li {
-            margin: 10px 0;
+            margin: 50px 0;
         }
         .sidebar ul li a {
-            color: white;
-            text-decoration: none;
-            font-weight: bold;
-            transition: color 0.3s;
+            display: inline-block;
+            background-color: #ffffff;
+            color: #333;
+            padding: 10px 70px;
+            border-radius: 10px;
+            text-decoration: none; /* Remove underline */
+            text-align: center;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 10px 0; /* Add spacing between items */
+            transition: background-color 0.3s, border-color 0.3s;
         }
         .sidebar ul li a:hover {
-            color: #ff007f;
+            background-color: #ff007f;
+            color: white;
+            border-color: rgba(255, 0, 127, 1); /* Fully opaque pink border when hovered */
         }
         .main-content {
             flex: 1;
             padding: 20px;
-            display: flex;
-            flex-direction: column;
+            margin-left: 250px;
+            transition: margin-left 0.3s ease;
         }
         .section {
             background: #1a1a1a;
@@ -92,33 +113,71 @@
             gap: 20px;
         }
         .left-section, .right-section {
-            flex: 1;
+            flex: 5;
         }
         .block {
-            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 15px 30px;
             margin-top: 20px;
-            border-radius: 10px;
-            box-shadow: 0 4px 10px rgba(38, 9, 23, 0.5);
-            border: 2px solid #ff007f;
+            border-radius: 20px;
+            color: rgb(0, 0, 0);
             text-align: center;
-
+            cursor: pointer;
+            border: 2px solid rgb(255, 255, 255); /* White border */
+            transition: background-color 0.3s, border-color 0.3s;
+        }
+        .block:hover {
+            background-color: #ffffff;
+            border-color: #ffffff;
+        }
+        .block:active {
+            background-color: #8b6176;
+            border-color: #b90059;
         }
         .logout-button {
-        background-color: #ff007f;
-        background: #ff007f;
-        color: white;
-        padding: 5px 10px;
-        text-decoration: none;
-        border-radius: 5px;
-        }   
+            background-color: #ff007f;
+            color: white;
+            padding: 5px 10px;
+            text-decoration: none;
+            border-radius: 5px;
+        }
         .logout-button:hover {
-        background-color: #090909;
-        border: 1px solid #ff007f;
+            background-color: #090909;
+            border: 1px solid #231c20;
+        }
+        .toggle-btn {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: #ffffff;
+            border: none;
+            color: #5fd4ad;
+            padding: 10px;
+            cursor: pointer;
+            z-index: 2;
+        }
+        .toggle-btn:hover {
+            background-color: #090909;
+        }
+        .sidebar.closed {
+            width: 0;
+            padding: 0;
+            visibility: hidden; 
+        }
+        .sidebar.closed ul {
+            display: none; 
+        }
+        .main-content.closed {
+            margin-left: 0;
         }
     </style>
 </head>
 <body>
+    <button class="toggle-btn" onclick="toggleSidebar()">☰</button>
     <header class="top-bar">
+        <img src="your-logo-path.png" alt="Logo" class="logo"> <!-- Replace "your-logo-path.png" with your logo image path -->
         <h1>Ctrl.save</h1>
         <div class="header-right">
             <span>Welcome, <%- username %>!</span>
@@ -144,15 +203,27 @@
         <main class="main-content">
             <div class="content">
                 <div class="left-section">
-                    <div class="block">Wallet <br> 999,999,999.99</div>
+                    <!-- Wallet block with link to the wallet page -->
+                    <a href="/wallet" class="block">Wallet <br> 999,999,999.99</a>
                     <div class="block">Transaction</div>
-                    <div class="block">Summary/Graph/Stats</div>
+                    <div class="block">Summary</div>
                 </div>
                 <div class="right-section">
-                    <div class="block">CATEGORIES</div>
+                    <!-- Button-like block for categories -->
+                    <div class="block">Categories</div>
                 </div>
             </div>
         </main>
     </div>
+
+    <script>
+        // Function to toggle the sidebar
+        function toggleSidebar() {
+            const sidebar = document.querySelector('.sidebar');
+            const mainContent = document.querySelector('.main-content');
+            sidebar.classList.toggle('closed');
+            mainContent.classList.toggle('closed');
+        }
+    </script>
 </body>
 </html>
