@@ -28,7 +28,6 @@
         align-items: center;
         font-size: 14px;
         font-weight: 100;
-        
       }
 
       header h1 {
@@ -111,7 +110,6 @@
           to right,
           rgb(153, 152, 153),
           #4ac395
-        f
         );
         top: 50%;
         z-index: -1;
@@ -136,10 +134,11 @@
 
       #toggle:checked ~ .switch .indicator.right {
         width: 95px;
-      } 
-    #toggle {
+      }
+
+      #toggle {
         display: none;
-    }
+      }
 
       .container {
         display: flex;
@@ -168,7 +167,7 @@
         box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
         border: 1px solid rgb(255, 255, 255);
         padding: 15px;
-        background-color: transparent;
+        background-color: #ffff;
       }
 
       h1 {
@@ -256,6 +255,25 @@
       a {
         color: white;
         text-decoration: none;
+      }
+
+      footer {
+        background-color: #60d3e4;
+        color: white;
+        text-align: center;
+        padding: 20px;
+        position: relative;
+        bottom: 0;
+        width: 100%;
+      }
+
+      .footer-content a {
+        color: #4caf50;
+        text-decoration: none;
+      }
+
+      .footer-content a:hover {
+        text-decoration: underline;
       }
     </style>
   </head>
@@ -347,6 +365,13 @@
         </div>
       </div>
     </div>
+
+    <footer>
+      <div class="footer-content">
+        <p>&copy; 2025 Your Wallet App. All rights reserved.</p>
+        <p>Contact us at <a href="mailto:support@yourwalletapp.com">support@yourwalletapp.com</a></p>
+      </div>
+    </footer>
 
     <script>
       let transactions = [];
