@@ -52,6 +52,126 @@
     padding-bottom: 30px;
     background-color: #e2e1dc;
   }
+  header {
+        background-color: #5fd4ad;
+        color: white;
+        padding: 20px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font-size: 14px;
+        font-weight: 100;
+      }
+
+      header h1 {
+        margin: 0;
+      }
+
+      .toggle-container {
+        display: flex;
+        align-items: center;
+      }
+
+      .switch {
+        width: fit-content;
+        height: fit-content;
+        padding: 5px;
+        background: linear-gradient(rgb(211, 210, 212), rgb(245, 244, 246));
+        box-shadow: inset 0px 2px 2px 0px rgba(0, 0, 0, 0.2);
+        border-radius: 2mm;
+        display: flex;
+        perspective: 300px;
+        position: relative;
+      }
+
+      .mode {
+        width: 100px;
+        height: 60px;
+        background: linear-gradient(rgb(72, 160, 219), rgb(40, 235, 225));
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: 0.25s transform;
+      }
+
+      .mode:nth-child(1) {
+        border-radius: 2mm 0 0 2mm;
+        transform-origin: right;
+      }
+
+      .mode:nth-child(2) {
+        border-radius: 0 2mm 2mm 0;
+        transform-origin: left;
+      }
+
+      .text {
+        font-family: 'Epilogue';
+        font-size: 27px;
+        font-weight: 800;
+        color: transparent;
+        background-color: #000000;
+        background-clip: text;
+        text-shadow: 1px 1px 2px rgba(255, 255, 255, 0.3);
+      }
+
+      #toggle:not(:checked) ~ .switch .mode:nth-child(1) {
+        transform: rotateY(50deg);
+        background: rgb(238, 237, 239);
+        box-shadow: -10px 5px 20px rgba(0, 0, 0, 0.2);
+      }
+
+      #toggle:checked ~ .switch .mode:nth-child(2) {
+        transform: rotateY(-50deg);
+        background: rgb(238, 237, 239);
+        box-shadow: 10px 5px 20px rgba(0, 0, 0, 0.2);
+      }
+
+      #toggle:not(:checked) ~ .switch .mode:nth-child(1) .text {
+        background-color: #10476e;
+      }
+
+      #toggle:checked ~ .switch .mode:nth-child(2) .text {
+        background-color: #10476e;
+      }
+
+      .indicator {
+        position: absolute;
+        height: 52px;
+        width: 0;
+        font-family: Epilo;
+        background: linear-gradient(
+          to right,
+          rgb(153, 152, 153),
+          #4ac395
+        );
+        top: 50%;
+        z-index: -1;
+        transition: 0.25s;
+      }
+
+      .indicator.left {
+        left: 5px;
+        transform: translate(0, -50%) rotateY(-65deg);
+        transform-origin: left;
+      }
+
+      .indicator.right {
+        right: 5px;
+        transform: translate(0, -50%) rotateY(65deg);
+        transform-origin: right;
+      }
+
+      #toggle:not(:checked) ~ .switch .indicator.left {
+        width: 95px;
+      }
+
+      #toggle:checked ~ .switch .indicator.right {
+        width: 95px;
+      }
+
+      #toggle {
+        display: none;
+      }
   .container {
     position: relative;
     width: 1200px;
@@ -60,9 +180,7 @@
     padding: 5px;
     color: #fff;
     display: flex;
-  
     border-radius: 10px;
-    background-color: #373c4f;
   }
   .left {
     width: 60%;
@@ -90,7 +208,6 @@
     width: 12px;
     height: 97%;
     border-radius: 0 5px 5px 0;
-    background-color: #d3d4d6d7;
     transform: translateY(-50%);
   }
   .calendar::before {
@@ -582,6 +699,25 @@
     </style>
   </head>
   <body>
+    <header>
+      <div class="toggle-container">
+        <input type="checkbox" name="toggle" id="toggle" />
+        <label for="toggle" class="switch">
+          <div class="mode">
+            <div class="text">ctrl</div>
+          </div>
+          <div class="mode">
+            <div class="text">save</div>
+          </div>
+          <div class="indicator left"></div>
+          <div class="indicator right"></div>
+        </label>
+      </div>
+      <h1><a href="/homepage">Home</a></h1>
+      <h1><a href="/Calendar">Wallet</a></h1>
+      <h1><a href="/Stats">Stats</a></h1>
+      <h1><a href="/Summary">Summary</a></h1>
+    </header>
     <div class="container">
       <div class="left">
         <div class="calendar">
@@ -688,24 +824,6 @@ const months = [
   "November",
   "December",
 ];
-
-// const eventsArr = [
-//   {
-//     day: 13,
-//     month: 11,
-//     year: 2022,
-//     events: [
-//       {
-//         title: "Event 1 lorem ipsun dolar sit genfa tersd dsad ",
-//         time: "10:00 AM",
-//       },
-//       {
-//         title: "Event 2",
-//         time: "11:00 AM",
-//       },
-//     ],
-//   },
-// ];
 
 const eventsArr = [];
 getEvents();
