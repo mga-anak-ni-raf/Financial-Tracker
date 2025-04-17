@@ -9,81 +9,294 @@
     />
     <title>Wallet</title>
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 20px;
-            background-color: #f4f4f9;
-        }
-        .container {
-            max-width: 600px;
-            margin: 0 auto;
-            background-color: white;
-            padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-        }
-        h1 {
-            text-align: center;
-        }
-        label {
-            display: block;
-            margin: 10px 0 5px;
-        }
-        input[type="number"], input[type="text"], textarea {
-            padding: 10px;
-            width: 100%;
-            font-size: 16px;
-            border-radius: 5px;
-            border: 1px solid #ddd;
-            margin-bottom: 10px;
-        }
-        button {
-            padding: 10px 20px;
-            background-color: #4CAF50;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 16px;
-            margin-top: 20px;
-        }
-        button:hover {
-            background-color: #45a049;
-        }
-        .result, .transactions, .savings, .debts {
-            margin-top: 20px;
-            text-align: center;
-        }
-        .result p, .transactions p, .savings p, .debts p {
-            font-size: 18px;
-        }
-        .transaction-list, .debt-list {
-            margin-top: 20px;
-            text-align: left;
-        }
-        .transaction-item, .debt-item {
-            background-color: #f9f9f9;
-            margin: 10px 0;
-            padding: 10px;
-            border-radius: 5px;
-            box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
-        }
-        .progress-bar-container {
-            margin-top: 10px;
-            background-color: #ddd;
-            height: 20px;
-            width: 100%;
-            border-radius: 10px;
-        }
-        .progress-bar {
-            background-color: #4CAF50;
-            height: 100%;
-            border-radius: 10px;
-        }
+      body {
+        display: flex;
+        flex-direction: column;
+        height: 150vh;
+        margin: 0;
+        background: linear-gradient(#60d3e4, #5fd4ad);
+        color: rgb(0, 0, 0);
+        font-family: 'Epilogue', sans-serif;
+      }
+
+      header {
+        background-color: #5fd4ad;
+        color: white;
+        padding: 20px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font-size: 14px;
+        font-weight: 100;
+      }
+
+      header h1 {
+        margin: 0;
+      }
+
+      .toggle-container {
+        display: flex;
+        align-items: center;
+      }
+
+      .switch {
+        width: fit-content;
+        height: fit-content;
+        padding: 5px;
+        background: linear-gradient(rgb(211, 210, 212), rgb(245, 244, 246));
+        box-shadow: inset 0px 2px 2px 0px rgba(0, 0, 0, 0.2);
+        border-radius: 2mm;
+        display: flex;
+        perspective: 300px;
+        position: relative;
+      }
+
+      .mode {
+        width: 100px;
+        height: 60px;
+        background: linear-gradient(rgb(72, 160, 219), rgb(40, 235, 225));
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: 0.25s transform;
+      }
+
+      .mode:nth-child(1) {
+        border-radius: 2mm 0 0 2mm;
+        transform-origin: right;
+      }
+
+      .mode:nth-child(2) {
+        border-radius: 0 2mm 2mm 0;
+        transform-origin: left;
+      }
+
+      .text {
+        font-family: 'Epilogue';
+        font-size: 27px;
+        font-weight: 800;
+        color: transparent;
+        background-color: #000000;
+        background-clip: text;
+        text-shadow: 1px 1px 2px rgba(255, 255, 255, 0.3);
+      }
+
+      #toggle:not(:checked) ~ .switch .mode:nth-child(1) {
+        transform: rotateY(50deg);
+        background: rgb(238, 237, 239);
+        box-shadow: -10px 5px 20px rgba(0, 0, 0, 0.2);
+      }
+
+      #toggle:checked ~ .switch .mode:nth-child(2) {
+        transform: rotateY(-50deg);
+        background: rgb(238, 237, 239);
+        box-shadow: 10px 5px 20px rgba(0, 0, 0, 0.2);
+      }
+
+      #toggle:not(:checked) ~ .switch .mode:nth-child(1) .text {
+        background-color: #10476e;
+      }
+
+      #toggle:checked ~ .switch .mode:nth-child(2) .text {
+        background-color: #10476e;
+      }
+
+      .indicator {
+        position: absolute;
+        height: 52px;
+        width: 0;
+        font-family: Epilo;
+        background: linear-gradient(
+          to right,
+          rgb(153, 152, 153),
+          #4ac395
+        );
+        top: 50%;
+        z-index: -1;
+        transition: 0.25s;
+      }
+
+      .indicator.left {
+        left: 5px;
+        transform: translate(0, -50%) rotateY(-65deg);
+        transform-origin: left;
+      }
+
+      .indicator.right {
+        right: 5px;
+        transform: translate(0, -50%) rotateY(65deg);
+        transform-origin: right;
+      }
+
+      #toggle:not(:checked) ~ .switch .indicator.left {
+        width: 95px;
+      }
+
+      #toggle:checked ~ .switch .indicator.right {
+        width: 95px;
+      }
+
+      #toggle {
+        display: none;
+      }
+
+      .container {
+        display: flex;
+        justify-content: space-between;
+        max-width: 900px;
+        margin: 30px auto 0;
+        padding: 30px;
+        width: 100%;
+        box-sizing: border-box;
+        gap: 20px;
+      }
+
+      .left-container,
+      .right-container {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+      }
+
+      .budget-container,
+      .transactions-container,
+      .savings-container,
+      .debts-container {
+        border-radius: 10px;
+        box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+        border: 1px solid rgb(255, 255, 255);
+        padding: 15px;
+        background-color: #ffff;
+      }
+
+      h1 {
+        text-align: center;
+        font-size: 18px;
+      }
+
+      h2,
+      h3 {
+        text-align: center;
+        font-size: 16px;
+      }
+
+      label {
+        display: block;
+        margin: 8px 0 4px;
+        font-size: 14px;
+      }
+
+      input[type='number'],
+      input[type='text'],
+      textarea {
+        padding: 8px;
+        width: 100%;
+        font-size: 14px;
+        border-radius: 4px;
+        border: 1px solid #ddd;
+        margin-bottom: 8px;
+      }
+
+      button {
+        padding: 8px 16px;
+        background-color: #4caf50;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 14px;
+        margin-top: 10px;
+      }
+
+      button:hover {
+        background-color: #45a049;
+      }
+
+      .result,
+      .transactions,
+      .savings,
+      .debts {
+        margin-top: 10px;
+        text-align: center;
+      }
+
+      .transaction-list,
+      .debt-list {
+        margin-top: 10px;
+        text-align: left;
+      }
+
+      .transaction-item,
+      .debt-item {
+        background-color: #f9f9f9;
+        margin: 6px 0;
+        padding: 8px;
+        border-radius: 4px;
+        box-shadow: 0 0 3px rgba(0, 0, 0, 0.1);
+        font-size: 14px;
+      }
+
+      .progress-bar-container {
+        margin-top: 8px;
+        background-color: #ddd;
+        height: 16px;
+        width: 100%;
+        border-radius: 8px;
+      }
+
+      .progress-bar {
+        background-color: #4caf50;
+        height: 100%;
+        border-radius: 8px;
+        transition: width 0.5s ease-in-out;
+      }
+
+      a {
+        color: white;
+        text-decoration: none;
+      }
+
+      footer {
+        background-color: #ffffff;
+        color: rgb(0, 0, 0);
+        text-align: center;
+        padding: 20px;
+        position: relative;
+        bottom: 0;
+        width: 100%;
+      }
+
+      .footer-content a {
+        color: #000000;
+        text-decoration: none;
+      }
+
+      .footer-content a:hover {
+        text-decoration: underline;
+      }
     </style>
-</head>
-<body>
+  </head>
+  <body>
+    <header>
+      <div class="toggle-container">
+        <input type="checkbox" name="toggle" id="toggle" />
+        <label for="toggle" class="switch">
+          <div class="mode">
+            <div class="text">ctrl</div>
+          </div>
+          <div class="mode">
+            <div class="text">save</div>
+          </div>
+          <div class="indicator left"></div>
+          <div class="indicator right"></div>
+        </label>
+      </div>
+      <h1><a href="/homepage">Home</a></h1>
+      <h1><a href="/Calendar">Calendar</a></h1>
+      <h1><a href="/Stats">Stats</a></h1>
+      <h1><a href="/Summary">Summary</a></h1>
+    </header>
     <div class="container">
       <!-- Left Container for Budget and Transactions -->
       <div class="left-container">
@@ -161,217 +374,110 @@
     </footer>
 
     <script>
-        let transactions = [];
-        let debts = [];
-        let savingsGoal = 0;
-        let savingsSaved = 0;
-        let monthlyBudget = 0;
-        let weeklyBudget = 0;
-        let dailyBudget = 0;
-        let totalBudget = 0;
+      let transactions = [];
+      let debts = [];
+      let savingsGoal = 0;
+      let savingsSaved = 0;
+      let monthlyBudget = 0;
+      let weeklyBudget = 0;
+      let dailyBudget = 0;
+      let totalBudget = 0;
 
-        // Initialize the Budget
-        function initializeBudget() {
-            monthlyBudget = parseFloat(document.getElementById("monthlyBudget").value);
-            
-            if (isNaN(monthlyBudget) || monthlyBudget <= 0) {
-                alert("Please enter a valid budget amount.");
-                return;
-            }
+      function formatCurrency(amount) {
+        return amount.toLocaleString('en-PH', {
+          style: 'currency',
+          currency: 'PHP',
+        });
+      }
 
-            weeklyBudget = (monthlyBudget / 4).toFixed(2);
-            dailyBudget = (monthlyBudget / 30).toFixed(2);
-            totalBudget = monthlyBudget;
+      function initializeBudget() {
+        monthlyBudget = parseFloat(document.getElementById("monthlyBudget").value);
 
-            // Send the budget data to the backend API
-            fetch('/api/budget', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ 
-                    monthlyBudget, 
-                    weeklyBudget, 
-                    dailyBudget 
-                }),
-            })
-            .then(response => response.json())
-            .then(data => {
-                console.log('Budget set:', data);
-                updateBudgetDisplay();
-            })
-            .catch(error => {
-                console.error('Error:', error);
-            });
+        if (isNaN(monthlyBudget) || monthlyBudget <= 0) {
+          alert("Please enter a valid budget amount.");
+          return;
         }
 
-        // Add a new transaction to the transaction list
-        function addTransaction() {
-            const name = document.getElementById("transactionName").value;
-            const cost = parseFloat(document.getElementById("transactionCost").value);
-            const description = document.getElementById("transactionDescription").value;
-            const currentDate = new Date();
+        weeklyBudget = (monthlyBudget / 4).toFixed(2);
+        dailyBudget = (monthlyBudget / 30).toFixed(2);
+        totalBudget = monthlyBudget;
 
-            if (name === "" || isNaN(cost) || cost <= 0 || description === "") {
-                alert("Please fill in all fields with valid values.");
-                return;
-            }
+        fetch('/api/budget', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ monthlyBudget, weeklyBudget, dailyBudget }),
+        })
+          .then((res) => res.json())
+          .then((data) => {
+            console.log('Budget set:', data);
+            updateBudgetDisplay();
+          })
+          .catch((err) => console.error('Error:', err));
+      }
 
-            const dateTime = currentDate.toLocaleString();
+      function addTransaction() {
+        const name = document.getElementById("transactionName").value;
+        const cost = parseFloat(document.getElementById("transactionCost").value);
+        const description = document.getElementById("transactionDescription").value;
+        const currentDate = new Date();
 
-            // Send the transaction data to the backend API
-            fetch('/api/transaction', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ name, cost, description, dateTime }),
-            })
-            .then(response => response.json())
-            .then(data => {
-                console.log('Transaction added:', data);
-                totalBudget -= cost;  // Deduct from total budget
-                displayTransactions();
-                updateBudgetDisplay();
-            })
-            .catch(error => {
-                console.error('Error:', error);
-            });
+        if (!name || isNaN(cost) || cost <= 0 || !description) {
+          alert("Please fill in all fields with valid values.");
+          return;
         }
 
-        // Display transactions
-        function displayTransactions() {
-            const transactionListDiv = document.getElementById("transactionList");
-            transactionListDiv.innerHTML = "";
+        const dateTime = currentDate.toLocaleString();
+        const transaction = { name, cost, description, dateTime };
 
-            if (transactions.length === 0) {
-                transactionListDiv.innerHTML = "<p>No transactions recorded yet.</p>";
-                return;
-            }
+        fetch('/api/transaction', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(transaction),
+        })
+          .then((res) => res.json())
+          .then((data) => {
+            console.log('Transaction added:', data);
+            transactions.push(transaction);
+            totalBudget -= cost;
+            updateBudgetDisplay();
+            displayTransactions();
 
-            transactions.forEach(transaction => {
-                const transactionItem = document.createElement("div");
-                transactionItem.classList.add("transaction-item");
+            document.getElementById("transactionName").value = "";
+            document.getElementById("transactionCost").value = "";
+            document.getElementById("transactionDescription").value = "";
+          })
+          .catch((err) => console.error('Error:', err));
+      }
 
-                transactionItem.innerHTML = `
-                    <p><strong>${transaction.name}</strong> - ₱${transaction.cost}</p>
-                    <p>${transaction.description}</p>
-                    <p><small>Recorded on: ${transaction.dateTime}</small></p>
-                `;
+      function displayTransactions() {
+        const transactionListDiv = document.getElementById("transactionList");
+        transactionListDiv.innerHTML = "";
 
-                transactionListDiv.appendChild(transactionItem);
-            });
+        if (transactions.length === 0) {
+          transactionListDiv.innerHTML = "<p>No transactions recorded yet.</p>";
+          return;
         }
 
-        // Update the budget display after a transaction
-        function updateBudgetDisplay() {
-            const resultDiv = document.getElementById("result");
-            resultDiv.innerHTML = `
-                <p>Monthly Budget: ₱${monthlyBudget.toFixed(2)}</p>
-                <p>Weekly Budget: ₱${weeklyBudget}</p>
-                <p>Daily Budget: ₱${dailyBudget}</p>
-                <p>Total Budget: ₱${totalBudget.toFixed(2)}</p>
-            `;
-        }
+        transactions.forEach((transaction) => {
+          const item = document.createElement("div");
+          item.classList.add("transaction-item");
+          item.innerHTML = `
+            <p><strong>${transaction.name}</strong> - ${formatCurrency(transaction.cost)}</p>
+            <p>${transaction.description}</p>
+            <p><small>Recorded on: ${transaction.dateTime}</small></p>
+          `;
+          transactionListDiv.appendChild(item);
+        });
+      }
 
-        // Add savings contribution
-        function addSavings() {
-            const goalAmount = parseFloat(document.getElementById("savingsGoalAmount").value);
-            const contribution = parseFloat(document.getElementById("savingsContribution").value);
-            
-            if (isNaN(goalAmount) || goalAmount <= 0) {
-                alert("Please enter a valid savings goal amount.");
-                return;
-            }
-            
-            if (isNaN(contribution) || contribution <= 0) {
-                alert("Please enter a valid savings contribution.");
-                return;
-            }
-
-            savingsGoal = goalAmount;
-            savingsSaved += contribution;
-
-            document.getElementById("savingsGoalDisplay").innerText = savingsGoal.toFixed(2);
-            document.getElementById("savingsSaved").innerText = savingsSaved.toFixed(2);
-
-            const progressPercent = Math.min((savingsSaved / savingsGoal) * 100, 100);
-            document.getElementById("progressBar").style.width = progressPercent + "%";
-
-            // Send the savings contribution to the backend API
-            fetch('/api/savings', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ goalAmount, contribution }),
-            })
-            .then(response => response.json())
-            .then(data => {
-                console.log('Savings contribution added:', data);
-            })
-            .catch(error => {
-                console.error('Error:', error);
-            });
-        }
-
-        // Add a new debt to the debt list
-        function addDebt() {
-            const name = document.getElementById("debtName").value;
-            const amount = parseFloat(document.getElementById("debtAmount").value);
-            const interest = parseFloat(document.getElementById("debtInterest").value);
-            const dueDate = document.getElementById("debtDueDate").value;
-            
-            if (name === "" || isNaN(amount) || amount <= 0) {
-                alert("Please fill in all fields with valid values.");
-                return;
-            }
-
-            const newDebt = { name, amount, interest, dueDate };
-
-            // Send the debt data to the backend API
-            fetch('/api/debt', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(newDebt),
-            })
-            .then(response => response.json())
-            .then(data => {
-                console.log('Debt added:', data);
-                totalBudget -= amount;  // Deduct from total budget
-                displayDebts();
-                updateBudgetDisplay();
-            })
-            .catch(error => {
-                console.error('Error:', error);
-            });
-        }
-
-        // Display debts
-        function displayDebts() {
-            const debtListDiv = document.getElementById("debtList");
-            debtListDiv.innerHTML = "";
-
-            if (debts.length === 0) {
-                debtListDiv.innerHTML = "<p>No debts recorded yet.</p>";
-                return;
-            }
-
-            debts.forEach(debt => {
-                const debtItem = document.createElement("div");
-                debtItem.classList.add("debt-item");
-
-                debtItem.innerHTML = `
-                    <p><strong>${debt.name}</strong> - ₱${debt.amount}</p>
-                    <p>Interest Rate: ${debt.interest}%</p>
-                    <p>Due Date: ${debt.dueDate}</p>
-                `;
-
-                debtListDiv.appendChild(debtItem);
-            });
-        }
+      function updateBudgetDisplay() {
+        document.getElementById("result").innerHTML = `
+          <p>Monthly Budget: ${formatCurrency(monthlyBudget)}</p>
+          <p>Weekly Budget: ${formatCurrency(weeklyBudget)}</p>
+          <p>Daily Budget: ${formatCurrency(dailyBudget)}</p>
+          <p>Total Budget Remaining: ${formatCurrency(totalBudget)}</p>
+        `;
+      }
     </script>
   </body>
 </html>
