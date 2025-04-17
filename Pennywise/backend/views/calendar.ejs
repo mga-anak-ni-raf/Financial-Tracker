@@ -182,260 +182,22 @@
             border: 2px solid #ff007f;
         }
         .today {
-            background: #1a1a1a;
-            color: white;
+            background: #5fd4ad;
+            color: #000000;
             font-weight: bold;
         }
-        .event {
-            color: rgb(139, 80, 80);
-            font-size: 12px;
-            padding: 3px;
-            border-radius: 5px;
-            position: absolute;
-            bottom: 5px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 80%;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
+        .today:hover{
+            background-color: #ff007f;
         }
-        
-.container .right {
-  position: relative;
-  width: 40%;
-  min-height: 100%;
-  padding: 20px 0;
-}
-
-.right .today-date {
-  width: 10%;
-  height: 50px;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0 40px;
-  padding-left: 70px;
-  margin-top: -500px;
-  margin-left: 700px;
-  text-transform: capitalize;
-}
-.right .today-date .event-day {
-  font-size: 2rem;
-  font-weight: 500;
-}
-.right .today-date .event-date {
-  font-size: 1rem;
-  font-weight: 400;
-  color: #878895;
-}
-.events {
-  width: 100%;
-  height: 100%;
-  max-height: 600px;
-  overflow-x: hidden;
-  overflow-y: auto;
-  display: flex;
-  flex-direction: column;
-  padding-left: 4px;
-}
-.events .event {
-  position: relative;
-  width: 95%;
-  min-height: 70px;
-  display: flex;
-  justify-content: center;
-  flex-direction: column;
-  gap: 5px;
-  padding: 0 20px;
-  padding-left: 50px;
-  color: #fff;
-  background: linear-gradient(90deg, #3f4458, transparent);
-  cursor: pointer;
-}
-/* even event */
-.events .event:nth-child(even) {
-  background: transparent;
-}
-.events .event:hover {
-  background: linear-gradient(90deg, var(--primary-clr), transparent);
-}
-.events .event .title {
-  display: flex;
-  align-items: center;
-  pointer-events: none;
-}
-.events .event .title .event-title {
-  font-size: 1rem;
-  font-weight: 400;
-  margin-left: 20px;
-}
-.events .event i {
-  color: var(--primary-clr);
-  font-size: 0.5rem;
-}
-.events .event:hover i {
-  color: #fff;
-}
-.events .event .event-time {
-  font-size: 0.8rem;
-  font-weight: 400;
-  color: #878895;
-  margin-left: 15px;
-  pointer-events: none;
-}
-.events .event:hover .event-time {
-  color: #fff;
-}
-/* add tick in event after */
-.events .event::after {
-  content: "✓";
-  position: absolute;
-  top: 50%;
-  right: 0;
-  font-size: 3rem;
-  line-height: 1;
-  display: none;
-  align-items: center;
-  justify-content: center;
-  opacity: 0.3;
-  color: var(--primary-clr);
-  transform: translateY(-50%);
-}
-.events .event:hover::after {
-  display: flex;
-}
-.add-event {
-  position: absolute;
-  bottom: 30px;
-  right: 30px;
-  width: 40px;
-  height: 40px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 1rem;
-  color: #878895;
-  border: 2px solid #878895;
-  opacity: 0.5;
-  border-radius: 50%;
-  background-color: transparent;
-  cursor: pointer;
-}
-.add-event:hover {
-  opacity: 1;
-}
-.add-event i {
-  pointer-events: none;
-}
-.events .no-event {
-  width: 100%;
-  height: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 1.5rem;
-  font-weight: 500;
-  color: #878895;
-}
-.add-event-wrapper {
-  position: absolute;
-  bottom: 100px;
-  left: 50%;
-  width: 90%;
-  max-height: 0;
-  overflow: hidden;
-  border-radius: 5px;
-  background-color: #fff;
-  transform: translateX(-50%);
-  transition: max-height 0.5s ease;
-}
-.add-event-wrapper.active {
-  max-height: 300px;
-}
-.add-event-header {
-  width: 100%;
-  height: 50px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0 20px;
-  color: #373c4f;
-  border-bottom: 1px solid #f5f5f5;
-}
-.add-event-header .close {
-  font-size: 1.5rem;
-  cursor: pointer;
-}
-.add-event-header .close:hover {
-  color: var(--primary-clr);
-}
-.add-event-header .title {
-  font-size: 1.2rem;
-  font-weight: 500;
-}
-.add-event-body {
-  width: 100%;
-  height: 100%;
-  display: flex;
-  flex-direction: column;
-  gap: 5px;
-  padding: 20px;
-}
-.add-event-body .add-event-input {
-  width: 100%;
-  height: 40px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 10px;
-}
-.add-event-body .add-event-input input {
-  width: 100%;
-  height: 100%;
-  outline: none;
-  border: none;
-  border-bottom: 1px solid #f5f5f5;
-  padding: 0 10px;
-  font-size: 1rem;
-  font-weight: 400;
-  color: #373c4f;
-}
-.add-event-body .add-event-input input::placeholder {
-  color: #a5a5a5;
-}
-.add-event-body .add-event-input input:focus {
-  border-bottom: 1px solid var(--primary-clr);
-}
-.add-event-body .add-event-input input:focus::placeholder {
-  color: var(--primary-clr);
-}
-.add-event-footer {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 20px;
-}
-.add-event-footer .add-event-btn {
-  height: 40px;
-  font-size: 1rem;
-  font-weight: 500;
-  outline: none;
-  border: none;
-  color: #fff;
-  background-color: var(--primary-clr);
-  border-radius: 5px;
-  cursor: pointer;
-  padding: 5px 10px;
-  border: 1px solid var(--primary-clr);
-}
-.add-event-footer .add-event-btn:hover {
-  background-color: transparent;
-  color: var(--primary-clr);
-}
-
+        .calendar-body .days .active::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            box-shadow: 0 0 10px 2px var(--primary-clr);
+            }
     </style>
 </head>
 <body>
@@ -474,6 +236,11 @@
             <tbody id="calendar-body"></tbody>
         </table>
     </div>
+
+  <div class="notes">
+    
+  </div>
+
 
     <script>
         let currentDate = new Date();
