@@ -25,8 +25,6 @@
     --primary-clr: #b38add;
   }
   * {
-    margin: 0;
-    padding: 0;
     box-sizing: border-box;
     font-family: "Poppins", sans-serif;
   }
@@ -36,13 +34,12 @@
   }
   ::-webkit-scrollbar-track {
     background: #f5f5f5;
-    border-radius: 50px;
+    border-radius: 5px;
   }
   ::-webkit-scrollbar-thumb {
     background: var(--primary-clr);
-    border-radius: 50px;
+    border-radius: 5px;
   }
-  
   body {
     position: relative;
     min-height: 100vh;
@@ -52,22 +49,29 @@
     padding-bottom: 30px;
     background-color: #e2e1dc;
   }
-  header {
-        background-color: #5fd4ad;s
-        padding: 20px;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        font-size: 14px;
-        font-weight: 100;
+    header {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      background-color: #5fd4ad;
+      color: white;
+      padding: 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 14px;
+      font-weight: 100;
       }
       header h1 {
         margin: 0;
       }
+
       .toggle-container {
         display: flex;
         align-items: center;
       }
+
       .switch {
         width: fit-content;
         height: fit-content;
@@ -170,15 +174,14 @@
       }
   .container {
     position: relative;
-    width: 1200px;
-    margin: 0 auto;
+    margin-top: 700px;
+    width: 700px;
+    height: 500px;
+    padding: 5px;
     color: #fff;
     display: flex;
     border-radius: 10px;
-  }
-  .left {
-    width: 60%;
-    padding: 20px;
+    background-color: #373c4f;
   }
   .calendar {
     position: relative;
@@ -197,16 +200,14 @@
   .calendar::after {
     content: "";
     position: absolute;
-    top: 50%;
-    left: 100%;
-    width: 12px;
-    height: 97%;
     border-radius: 0 5px 5px 0;
+    background-color: #d3d4d6d7;
     transform: translateY(-50%);
   }
   .calendar::before {
     height: 94%;
     left: calc(100% + 12px);
+    background-color: rgb(153, 153, 153);
   }
   .calendar .month {
     width: 100%;
@@ -214,9 +215,9 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 0 50px;
+    padding: 0 10px;
     font-size: 1.2rem;
-    font-weight: 500;
+    font-weight: 200;
     text-transform: capitalize;
   }
   .calendar .month .prev,
@@ -229,17 +230,18 @@
   }
   .calendar .weekdays {
     width: 100%;
+    height: 50px;
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 0 20px;
+    padding: 0 10px;
     font-size: 1rem;
-    font-weight: 500;
+    font-weight: 200;
     text-transform: capitalize;
   }
   .weekdays div {
     width: 14.28%;
-    height: 60%;
+    height: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -249,9 +251,9 @@
     display: flex;
     flex-wrap: wrap;
     justify-content: space-between;
-    padding: 0 20px;
+    padding: 0 10px;
     font-size: 1rem;
-    font-weight: 500;
+    font-weight: 200;
     margin-bottom: 20px;
   }
   .calendar .days .day {
@@ -326,6 +328,51 @@
   }
   .calendar .days .active.event {
     padding-bottom: 10px;
+  }
+  .calendar .goto-today {
+    width: 100%;
+    height: 50px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 5px;
+    padding: 0 20px;
+    margin-bottom: 20px;
+    color: var(--primary-clr);
+  }
+  .calendar .goto-today .goto {
+    display: flex;
+    align-items: center;
+    border-radius: 5px;
+    overflow: hidden;
+    border: 1px solid var(--primary-clr);
+  }
+  .calendar .goto-today .goto input {
+    width: 100%;
+    height: 30px;
+    outline: none;
+    border: none;
+    border-radius: 5px;
+    padding: 0 20px;
+    color: var(--primary-clr);
+    border-radius: 5px;
+  }
+  .calendar .goto-today button {
+    padding: 5px 10px;
+    border: 1px solid var(--primary-clr);
+    border-radius: 5px;
+    background-color: transparent;
+    cursor: pointer;
+    color: var(--primary-clr);
+  }
+  .calendar .goto-today button:hover {
+    color: #fff;
+    background-color: var(--primary-clr);
+  }
+  .calendar .goto-today .goto button {
+    border: none;
+    border-left: 1px solid var(--primary-clr);
+    border-radius: 0;
   }
   .container .right {
     position: relative;
@@ -576,12 +623,12 @@
     }
     .container .left {
       width: 100%;
-      height: 60%;
+      height: 100%;
       padding: 20px 0;
     }
     .container .right {
       width: 100%;
-      height: 60%;
+      height: 100%;
       padding: 20px 0;
     }
     .calendar::before,
@@ -623,6 +670,26 @@
       padding: 20px;
     }
   }
+  
+  .credits {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    text-align: center;
+    padding: 10px;
+    font-size: 12px;
+    color: #fff;
+    background-color: #b38add;
+  }
+  .credits a {
+    color: #fff;
+    text-decoration: none;
+    font-weight: 600;
+  }
+  .credits a:hover {
+    text-decoration: underline;
+  }
     </style>
   </head>
   <body>
@@ -641,10 +708,11 @@
         </label>
       </div>
       <h1><a href="/homepage">Home</a></h1>
-      <h1><a href="/Calendar">Wallet</a></h1>
+      <h1><a href="/Calendar">Calendar</a></h1>
       <h1><a href="/Stats">Stats</a></h1>
       <h1><a href="/Summary">Summary</a></h1>
     </header>
+
     <div class="container">
       <div class="left">
         <div class="calendar">
@@ -663,6 +731,13 @@
             <div>Sat</div>
           </div>
           <div class="days"></div>
+          <div class="goto-today">
+            <div class="goto">
+              <input type="text" placeholder="mm/yyyy" class="date-input" />
+              <button class="goto-btn">Go</button>
+            </div>
+            <button class="today-btn">Today</button>
+          </div>
         </div>
       </div>
       <div class="right">
@@ -744,6 +819,24 @@ const months = [
   "November",
   "December",
 ];
+
+// const eventsArr = [
+//   {
+//     day: 13,
+//     month: 11,
+//     year: 2022,
+//     events: [
+//       {
+//         title: "Event 1 lorem ipsun dolar sit genfa tersd dsad ",
+//         time: "10:00 AM",
+//       },
+//       {
+//         title: "Event 2",
+//         time: "11:00 AM",
+//       },
+//     ],
+//   },
+// ];
 
 const eventsArr = [];
 getEvents();
@@ -1164,6 +1257,6 @@ function convertTime(time) {
   time = timeHour + ":" + timeMin + " " + timeFormat;
   return time;
 }
-  </script>
+    </script>
   </body>
 </html>
