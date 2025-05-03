@@ -2,31 +2,39 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Financial Dashboard</title>
+  <title>Stats</title>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <link
+      href="https://fonts.googleapis.com/css2?family=Epilogue:wght@300;400;600;700&display=swap"
+      rel="stylesheet"
+      />
   <style>
     * {
       box-sizing: border-box;
     }
 
-    body {
-      font-family: 'Segoe UI', sans-serif;
+      body {
       margin: 0;
-      background-color: #f4f6f9;
-      color: #333;
-    }
+      font-family: 'Epilogue', sans-serif;
+      background: linear-gradient(to bottom,#60d3e4,#5fd4ad);
+      background-repeat: no-repeat;
+      background-attachment: fixed;
+      min-height: 100vh;
+}
+
+
 
     header {
-      background-color: #4CAF50;
+      background-color: #5fd4ad;
       color: white;
-      padding: 1rem 0;
+      padding: 15px;
     }
 
     header div {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      padding: 0 2rem;
+      padding:20px;
     }
 
     header h1 {
@@ -41,7 +49,7 @@
 
     .nav-btn {
       background-color: white;
-      color: #4CAF50;
+      color: #5fd4ad;
       border: none;
       padding: 0.5rem 1rem;
       font-weight: bold;
@@ -55,12 +63,12 @@
     }
 
     .logout {
-      background-color: #f44336;
+      background-color: #05847d;
       color: white;
     }
 
     .logout:hover {
-      background-color: #d32f2f;
+      background: color #222;
     }
 
     .view-toggle {
@@ -71,7 +79,7 @@
     }
 
     .toggle-btn {
-      background-color: #4CAF50;
+      background-color: #5fd4ad;
       color: white;
       border: none;
       padding: 0.5rem 1rem;
@@ -81,42 +89,72 @@
     }
 
     .toggle-btn:hover {
-      background-color: #45a049;
+      background-color: #5fd4ad;
     }
+    .page-container {
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh; /* full viewport height */
+}
+
+      main {
+     flex: 1; /* takes up all remaining space */
+}
 
     footer {
-      background-color: #333;
-      color: white;
-      text-align: center;
-      padding: 1rem 0;
-      position: fixed;
-      bottom: 0;
-      width: 100%;
+    background-color: #5fd4ad;
+    color: white;
+    text-align: center;
+    padding: 1rem 0;
     }
 
-    .chart-box {
-      background-color: white;
-      padding: 2rem;
-      border-radius: 20px;
-      box-shadow: 0 5px 20px rgba(0,0,0,0.08);
+    .bar-box,
+    .line-box,
+    .pie-box {
+      transform: scale(1.02);
+    }
+    .bar-box {
+      max-width: 700px;  /* ↓ was 1000px, now smaller */
+      width: 90%;
       margin: 2rem auto;
-      max-width: 1000px;
+      padding: 2rem;
+      background-color: whitesmoke;
+      border-radius: 20px;
+      box-shadow: 0 5px 20px rgba(255, 255, 255, 0.08);
       transition: transform 0.3s ease;
     }
 
-    .chart-box:hover {
-      transform: scale(1.02);
-    }
+    .line-box {
+      max-width: 700px;  /* ↓ was 1000px, now smaller */
+      width: 90%;
+       margin: 2rem auto;
+      padding: 2rem;
+      background-color: whitesmoke;
+      border-radius: 20px;
+      box-shadow: 0 5px 20px rgba(189, 116, 116, 0.08);
+      transition: transform 0.3s ease;
+    } 
 
+    .pie-box {
+      max-width: 700px;  /* ↓ was 1000px, now smaller */
+      width: 90%;
+      margin: 2rem auto;
+      padding: 2rem;
+      background-color: whitesmoke;
+      border-radius: 20px;
+      box-shadow: 0 5px 20px rgba(0,0,0,0.08);
+      transition: transform 0.3s ease;
+    }
+    
     canvas {
       width: 100% !important;
-      height: 500px !important;
+      height: 600% !important;
     }
 
     .totals {
       margin-top: 1rem;
       font-weight: bold;
-      color: #4CAF50;
+      color: #5fd4ad;
       font-size: 1.1rem;
       text-align: center;
     }
@@ -148,18 +186,30 @@
       resize: none;
       margin-bottom: 0.5rem;
     }
+  .note {
+  background-color: #5f5f5f;
+  padding: 1rem;
+  margin: 0.5rem 0;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+  
+      
+
+    
   </style>
 </head>
 <body>
 
 <header>
   <div>
-    <h1>📊 Financial Dashboard</h1>
+    <h1>Statistical Dashboard</h1>
     <div class="nav-container">
-      <button onclick="goHome()" class="nav-btn">🏠 Home</button>
-      <button onclick="goCalendar()" class="nav-btn">📅 Calendar</button>
-      <button onclick="goWallet()" class="nav-btn">💼 Wallet</button>
-      <button onclick="logOut()" class="nav-btn logout">🔒 Logout</button>
+      <button onclick="goHome()" class="nav-btn">Home</button>
+      <button onclick="goCalendar()" class="nav-btn">Calendar</button>
+      <button onclick="goWallet()" class="nav-btn">Wallet</button>
+      <button onclick="logOut()" class="nav-btn logout">Logout</button>
     </div>
   </div>
 </header>
@@ -169,16 +219,17 @@
   <button class="toggle-btn" onclick="changeView('weekly')">Weekly</button>
   <button class="toggle-btn" onclick="changeView('daily')">Daily</button>
 </div>
-
-<div class="chart-box">
+<div class="bar-box">
   <canvas id="barChart"></canvas>
   <p id="barTotalText" class="totals"></p>
 </div>
-<div class="chart-box">
+
+<div class="line-box">
   <canvas id="lineChart"></canvas>
   <p id="lineTotalText" class="totals"></p>
 </div>
-<div class="chart-box">
+
+<div class="pie-box">
   <canvas id="pieChart"></canvas>
   <p id="pieTotalText" class="totals"></p>
 </div>
@@ -234,7 +285,7 @@
       datasets: [{
         label: "Balance",
         data: [500, 300, 700, 200, 450, 300],
-        backgroundColor: "#4CAF50"
+        backgroundColor: "#5fd4ad"
       }]
     },
     options: {
@@ -255,8 +306,8 @@
       datasets: [{
         label: "Expenses", // Changed from "Debt" to "Expenses"
         data: [5, 10, 4, 8, 3, 7], // You can adjust these numbers as needed
-        borderColor: "#FF5733",
-        backgroundColor: "rgba(255, 87, 51, 0.2)",
+        borderColor: "#5fd4ad",
+        backgroundColor: "5fd4ad",
         fill: true,
         tension: 0.4
       }]
