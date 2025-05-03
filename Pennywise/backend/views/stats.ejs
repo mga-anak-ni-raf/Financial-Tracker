@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Financial Dashboard</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      margin: 0;
+      background-color: #f4f6f9;
+      color: #333;
+    }
+
+    header {
+      background-color: #4CAF50;
+      color: white;
+      padding: 1rem 0;
+    }
+
+    header div {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0 2rem;
+    }
+
+    header h1 {
+      margin: 0;
+      font-size: 1.5rem;
+    }
+
+    .nav-container {
+      display: flex;
+      gap: 1rem;
+    }
+
+    .nav-btn {
+      background-color: white;
+      color: #4CAF50;
+      border: none;
+      padding: 0.5rem 1rem;
+      font-weight: bold;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background-color 0.2s;
+    }
+
+    .nav-btn:hover {
+      background-color: #e6f4ea;
+    }
+
+    .logout {
+      background-color: #f44336;
+      color: white;
+    }
+
+    .logout:hover {
+      background-color: #d32f2f;
+    }
+
+    .view-toggle {
+      display: flex;
+      justify-content: center;
+      gap: 1rem;
+      margin: 1rem 0;
+    }
+
+    .toggle-btn {
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      padding: 0.5rem 1rem;
+      border-radius: 6px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    .toggle-btn:hover {
+      background-color: #45a049;
+    }
+
+    footer {
+      background-color: #333;
+      color: white;
+      text-align: center;
+      padding: 1rem 0;
+      position: fixed;
+      bottom: 0;
+      width: 100%;
+    }
+
+    .chart-box {
+      background-color: white;
+      padding: 2rem;
+      border-radius: 20px;
+      box-shadow: 0 5px 20px rgba(0,0,0,0.08);
+      margin: 2rem auto;
+      max-width: 1000px;
+      transition: transform 0.3s ease;
+    }
+
+    .chart-box:hover {
+      transform: scale(1.02);
+    }
+
+    canvas {
+      width: 100% !important;
+      height: 500px !important;
+    }
+
+    .totals {
+      margin-top: 1rem;
+      font-weight: bold;
+      color: #4CAF50;
+      font-size: 1.1rem;
+      text-align: center;
+    }
+
+    .notes-transactions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 2rem;
+      justify-content: center;
+      padding: 2rem;
+    }
+
+    .notes, .transactions {
+      background: white;
+      border-radius: 12px;
+      padding: 1rem;
+      box-shadow: 0 0 10px rgba(0,0,0,0.05);
+      flex: 1;
+      min-width: 300px;
+      max-width: 500px;
+    }
+
+    textarea {
+      width: 100%;
+      padding: 0.5rem;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      font-size: 1rem;
+      resize: none;
+      margin-bottom: 0.5rem;
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div>
+    <h1>📊 Financial Dashboard</h1>
+    <div class="nav-container">
+      <button onclick="goHome()" class="nav-btn">🏠 Home</button>
+      <button onclick="goCalendar()" class="nav-btn">📅 Calendar</button>
+      <button onclick="goWallet()" class="nav-btn">💼 Wallet</button>
+      <button onclick="logOut()" class="nav-btn logout">🔒 Logout</button>
+    </div>
+  </div>
+</header>
+
+<div class="view-toggle">
+  <button class="toggle-btn" onclick="changeView('monthly')">Monthly</button>
+  <button class="toggle-btn" onclick="changeView('weekly')">Weekly</button>
+  <button class="toggle-btn" onclick="changeView('daily')">Daily</button>
+</div>
+
+<div class="chart-box">
+  <canvas id="barChart"></canvas>
+  <p id="barTotalText" class="totals"></p>
+</div>
+<div class="chart-box">
+  <canvas id="lineChart"></canvas>
+  <p id="lineTotalText" class="totals"></p>
+</div>
+<div class="chart-box">
+  <canvas id="pieChart"></canvas>
+  <p id="pieTotalText" class="totals"></p>
+</div>
+
+<div class="notes-transactions">
+  <div class="notes">
+    <h3>Add a Note</h3>
+    <textarea id="noteInput" rows="3" placeholder="Write your note here..."></textarea>
+    <button onclick="addNote()">Add Note</button>
+    <div class="note-list" id="notesContainer"></div>
+  </div>
+
+  <div class="transactions">
+    <h3>Online Transactions</h3>
+    <div class="transaction-list" id="transactionsContainer"></div>
+  </div>
+</div>
+
+<footer>
+  <p>&copy; 2025 Financial Dashboard. All rights reserved.</p>
+</footer>
+
+<script>
+  function goHome() {
+    window.location.href = "/homepage";
+  }
+
+  function goCalendar() {
+    window.location.href = "/calendar";
+  }
+
+  function goWallet() {
+    window.location.href = "/wallet";
+  }
+
+  function logOut() {
+    alert("Logging out...");
+    window.location.href = "/index";
+  }
+
+  let labelsMonthly = ["January", "February", "March", "April", "May", "June"];
+  let labelsWeekly = ["Week 1", "Week 2", "Week 3", "Week 4", "Week 5", "Week 6"];
+  let labelsDaily = ["Day 1", "Day 2", "Day 3", "Day 4", "Day 5", "Day 6"];
+
+  const barCtx = document.getElementById("barChart").getContext("2d");
+  const lineCtx = document.getElementById("lineChart").getContext("2d");
+  const pieCtx = document.getElementById("pieChart").getContext("2d");
+
+  let barChart = new Chart(barCtx, {
+    type: "bar",
+    data: {
+      labels: labelsMonthly,
+      datasets: [{
+        label: "Balance",
+        data: [500, 300, 700, 200, 450, 300],
+        backgroundColor: "#4CAF50"
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: {
+        title: {
+          display: true,
+          text: "Monthly Balance - Bar Chart"
+        }
+      }
+    }
+  });
+
+  let lineChart = new Chart(lineCtx, {
+    type: "line",
+    data: {
+      labels: labelsMonthly,
+      datasets: [{
+        label: "Expenses", // Changed from "Debt" to "Expenses"
+        data: [5, 10, 4, 8, 3, 7], // You can adjust these numbers as needed
+        borderColor: "#FF5733",
+        backgroundColor: "rgba(255, 87, 51, 0.2)",
+        fill: true,
+        tension: 0.4
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: {
+        title: {
+          display: true,
+          text: "Monthly Expenses - Line Chart" // Updated title
+        }
+      }
+    }
+  });
+
+  let pieChart = new Chart(pieCtx, {
+    type: "pie",
+    data: {
+      labels: ["Savings", "Other Expenses", "Investments", "Emergency Fund"],
+      datasets: [{
+        label: "Savings Allocation",
+        data: [1000, 1500, 1200, 2000],
+        backgroundColor: ["#FFEB3B", "#FF5733", "#4CAF50", "#00BCD4"]
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: {
+        title: {
+          display: true,
+          text: "Financial Savings Distribution - Pie Chart"
+        }
+      }
+    }
+  });
+
+  // Defining the changeView function to handle view changes
+  function changeView(view) {
+    if (view === 'weekly') {
+      barChart.data.labels = labelsWeekly;
+      lineChart.data.labels = labelsWeekly;
+      barChart.data.datasets[0].data = [300, 250, 400, 150, 500, 320];
+      lineChart.data.datasets[0].data = [7, 5, 8, 6, 4, 9];
+      barChart.options.plugins.title.text = "Weekly Balance - Bar Chart";
+      lineChart.options.plugins.title.text = "Weekly Expenses - Line Chart";
+    } else if (view === 'monthly') {
+      barChart.data.labels = labelsMonthly;
+      lineChart.data.labels = labelsMonthly;
+      barChart.data.datasets[0].data = [500, 300, 700, 200, 450, 300];
+      lineChart.data.datasets[0].data = [5, 10, 4, 8, 3, 7];
+      barChart.options.plugins.title.text = "Monthly Balance - Bar Chart";
+      lineChart.options.plugins.title.text = "Monthly Expenses - Line Chart";
+    } else if (view === 'daily') {
+      barChart.data.labels = labelsDaily;
+      lineChart.data.labels = labelsDaily;
+      barChart.data.datasets[0].data = [200, 100, 400, 150, 300, 200];
+      lineChart.data.datasets[0].data = [3, 6, 2, 5, 4, 7];
+      barChart.options.plugins.title.text = "Daily Balance - Bar Chart";
+      lineChart.options.plugins.title.text = "Daily Expenses - Line Chart";
+    }
+
+    barChart.update();
+    lineChart.update();
+  }
+</script>
+</body>
+</html>
