@@ -114,6 +114,10 @@ app.post("/signup", async (req, res) => {
     console.error("Signup error:", error);
     res.status(500).json({ message: "Server error during signup." });
   }
+
+  const newUser = await db.query("SELECT id FROM users WHERE username = $1", [username]);
+req.session.username = username;
+req.session.userId = newUser.rows[0].id; // ✅ Store userId
 });
 
 // **Login Route**
@@ -142,7 +146,7 @@ app.post("/login", async (req, res) => {
 
     // Store session data
     req.session.username = user.username;
-
+    req.session.userId = user.id; // ✅ Store userId from DB
     // ✅ Send JSON instead of redirecting
     res.json({ success: true, redirect: "/homepage" });
   } catch (error) {
@@ -258,7 +262,7 @@ app.route("/api/transaction")
       });
   });
 
-  
+
 // **Savings Route**
 app.post("/api/savings", (req, res) => {
   const { goalAmount, contribution } = req.body;
@@ -286,7 +290,7 @@ app.post("/api/savings", (req, res) => {
 });
 
 // **Debt Route**
-app.post("/api/debt", (req, res) => {
+app.post("/api/debt", async (req, res) => {
   const { name, amount, interest, dueDate } = req.body;
   const username = req.session.username;
 
@@ -294,19 +298,44 @@ app.post("/api/debt", (req, res) => {
     return res.status(400).json({ message: "Missing debt data." });
   }
 
-  const query = `
-    INSERT INTO debts (username, name, amount, interest, due_date)
-    VALUES ($1, $2, $3, $4, $5)
-  `;
+  try {
+    // Fetch the user_id from the username
+    const result = await db.query("SELECT id FROM users WHERE username = $1", [username]);
+    if (result.rows.length === 0) {
+      return res.status(401).json({ message: "User not found." });
+    }
 
-  db.query(query, [username, name, amount, interest, dueDate])
-    .then(() => {
-      res.json({ success: true, message: "Debt added successfully." });
-    })
-    .catch((err) => {
-      console.error("Error saving debt:", err);
-      res.status(500).json({ message: "Error saving debt." });
-    });
+    const userId = result.rows[0].id;
+
+    // Insert into debts
+    const insertQuery = `
+      INSERT INTO debts (user_id, name, amount, interest_rate, due_date)
+      VALUES ($1, $2, $3, $4, $5)
+    `;
+    await db.query(insertQuery, [userId, name, amount, interest, dueDate]);
+
+    res.json({ success: true, message: "Debt added successfully." });
+  } catch (err) {
+    console.error("Error saving debt:", err);
+    res.status(500).json({ message: "Error saving debt." });
+  }
+});
+
+// GET /api/debt - Fetch all debts for logged-in user
+app.get("/api/debt", (req, res) => {
+  const userId = req.session.userId;
+if (!userId) {
+  return res.status(401).json({ message: "Unauthorized" });
+}
+
+const query = `
+  SELECT debt_id, name, amount, interest_rate, due_date
+  FROM debts
+  WHERE user_id = $1
+  ORDER BY due_date ASC
+`;
+
+db.query(query, [userId])
 });
 
 // **Start Server**

@@ -496,7 +496,8 @@
 
 window.addEventListener('DOMContentLoaded', () => {
   loadBudget();
-  loadTransactions(); // ← must be here!
+  loadTransactions();
+  loadDebts(); // 👈 ADD THIS
 });
 
   function loadBudget() {
@@ -525,6 +526,49 @@ window.addEventListener('DOMContentLoaded', () => {
             <p>Total Budget Remaining: ${formatCurrency(totalBudget)}</p>
           </div>`;
       }
+
+      function loadDebts() {
+  fetch('/api/debt')
+    .then(res => res.json())
+    .then(data => {
+      console.log("Fetched debts:", data);
+      if (data.success && Array.isArray(data.debts)) {
+        debts = data.debts.map(debt => ({
+          name: debt.name,
+          amount: debt.amount,
+          interest: debt.interest,
+          dueDate: new Date(debt.due_date).toLocaleDateString()
+        }));
+        displayDebts();
+      } else {
+        console.error("Invalid response format or no debts.");
+      }
+    })
+    .catch(err => {
+      console.error("Error loading debts:", err);
+    });
+}
+
+function displayDebts() {
+  const debtListDiv = document.getElementById("debtList");
+  debtListDiv.innerHTML = "";
+
+  if (debts.length === 0) {
+    debtListDiv.innerHTML = "<p>No debts recorded yet.</p>";
+    return;
+  }
+
+  debts.forEach(debt => {
+    const item = document.createElement("div");
+    item.classList.add("debt-item");
+    item.innerHTML = `
+      <p><strong>${debt.name}</strong> - ${formatCurrency(debt.amount)}</p>
+      <p>Interest Rate: ${debt.interest}%</p>
+      <p>Due Date: ${debt.dueDate}</p>
+    `;
+    debtListDiv.appendChild(item);
+  });
+}
     </script>
   </body>
 </html>
