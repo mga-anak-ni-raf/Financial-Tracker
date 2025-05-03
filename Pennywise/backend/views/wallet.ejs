@@ -374,110 +374,115 @@
     </footer>
 
     <script>
-      let transactions = [];
-      let debts = [];
-      let savingsGoal = 0;
-      let savingsSaved = 0;
-      let monthlyBudget = 0;
-      let weeklyBudget = 0;
-      let dailyBudget = 0;
-      let totalBudget = 0;
+  let transactions = [];
+  let monthlyBudget = 0;
+  let weeklyBudget = 0;
+  let dailyBudget = 0;
+  let totalBudget = 0;
 
-      function formatCurrency(amount) {
-        return amount.toLocaleString('en-PH', {
-          style: 'currency',
-          currency: 'PHP',
-        });
-      }
+  function formatCurrency(amount) {
+    return amount.toLocaleString('en-PH', {
+      style: 'currency',
+      currency: 'PHP',
+    });
+  }
 
-      function initializeBudget() {
-        monthlyBudget = parseFloat(document.getElementById("monthlyBudget").value);
+  function initializeBudget() {
+    monthlyBudget = parseFloat(document.getElementById("monthlyBudget").value);
 
-        if (isNaN(monthlyBudget) || monthlyBudget <= 0) {
-          alert("Please enter a valid budget amount.");
-          return;
-        }
+    if (isNaN(monthlyBudget) || monthlyBudget <= 0) {
+      alert("Please enter a valid budget amount.");
+      return;
+    }
 
-        weeklyBudget = (monthlyBudget / 4).toFixed(2);
-        dailyBudget = (monthlyBudget / 30).toFixed(2);
-        totalBudget = monthlyBudget;
+    weeklyBudget = monthlyBudget / 4;
+    dailyBudget = monthlyBudget / 30;
+    totalBudget = monthlyBudget;
 
-        fetch('/api/budget', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ monthlyBudget, weeklyBudget, dailyBudget }),
-        })
-          .then((res) => res.json())
-          .then((data) => {
-            console.log('Budget set:', data);
-            updateBudgetDisplay();
-          })
-          .catch((err) => console.error('Error:', err));
-      }
+    fetch('/api/budget', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ monthlyBudget, weeklyBudget, dailyBudget }),
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        console.log('Budget set:', data);
+        updateBudgetDisplay();
+      })
+      .catch((err) => console.error('Error:', err));
+  }
 
-      function addTransaction() {
-        const name = document.getElementById("transactionName").value;
-        const cost = parseFloat(document.getElementById("transactionCost").value);
-        const description = document.getElementById("transactionDescription").value;
-        const currentDate = new Date();
+  function addTransaction() {
+    const name = document.getElementById("transactionName").value;
+    const cost = parseFloat(document.getElementById("transactionCost").value);
+    const description = document.getElementById("transactionDescription").value;
+    const currentDate = new Date();
 
-        if (!name || isNaN(cost) || cost <= 0 || !description) {
-          alert("Please fill in all fields with valid values.");
-          return;
-        }
+    if (!name || isNaN(cost) || cost <= 0 || !description) {
+      alert("Please fill in all fields with valid values.");
+      return;
+    }
 
-        const dateTime = currentDate.toLocaleString();
-        const transaction = { name, cost, description, dateTime };
+    if (cost > totalBudget) {
+      alert("Transaction exceeds your remaining budget.");
+      return;
+    }
 
-        fetch('/api/transaction', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(transaction),
-        })
-          .then((res) => res.json())
-          .then((data) => {
-            console.log('Transaction added:', data);
-            transactions.push(transaction);
-            totalBudget -= cost;
-            updateBudgetDisplay();
-            displayTransactions();
+    const dateTime = currentDate.toLocaleString();
+    const transaction = { name, cost, description, dateTime };
 
-            document.getElementById("transactionName").value = "";
-            document.getElementById("transactionCost").value = "";
-            document.getElementById("transactionDescription").value = "";
-          })
-          .catch((err) => console.error('Error:', err));
-      }
+    fetch('/api/transaction', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(transaction),
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        console.log('Transaction added:', data);
+        transactions.push(transaction);
+        totalBudget -= cost;
+        updateBudgetDisplay();
+        displayTransactions();
 
-      function displayTransactions() {
-        const transactionListDiv = document.getElementById("transactionList");
-        transactionListDiv.innerHTML = "";
+        document.getElementById("transactionName").value = "";
+        document.getElementById("transactionCost").value = "";
+        document.getElementById("transactionDescription").value = "";
+      })
+      .catch((err) => console.error('Error:', err));
+  }
 
-        if (transactions.length === 0) {
-          transactionListDiv.innerHTML = "<p>No transactions recorded yet.</p>";
-          return;
-        }
+  function displayTransactions() {
+    const transactionListDiv = document.getElementById("transactionList");
+    transactionListDiv.innerHTML = "";
 
-        transactions.forEach((transaction) => {
-          const item = document.createElement("div");
-          item.classList.add("transaction-item");
-          item.innerHTML = `
-            <p><strong>${transaction.name}</strong> - ${formatCurrency(transaction.cost)}</p>
-            <p>${transaction.description}</p>
-            <p><small>Recorded on: ${transaction.dateTime}</small></p>
-          `;
-          transactionListDiv.appendChild(item);
-        });
-      }
+    if (transactions.length === 0) {
+      transactionListDiv.innerHTML = "<p>No transactions recorded yet.</p>";
+      return;
+    }
 
-      function updateBudgetDisplay() {
-        document.getElementById("result").innerHTML = `
-          <p>Monthly Budget: ${formatCurrency(monthlyBudget)}</p>
-          <p>Weekly Budget: ${formatCurrency(weeklyBudget)}</p>
-          <p>Daily Budget: ${formatCurrency(dailyBudget)}</p>
-          <p>Total Budget Remaining: ${formatCurrency(totalBudget)}</p>
-        `;
-      }
-    </script>
-  </body>
-</html>
+    transactions.forEach((transaction) => {
+      const item = document.createElement("div");
+      item.classList.add("transaction-item");
+      item.innerHTML = `
+        <p><strong>${transaction.name}</strong> - ${formatCurrency(transaction.cost)}</p>
+        <p>${transaction.description}</p>
+        <p><small>Recorded on: ${transaction.dateTime}</small></p>
+      `;
+      transactionListDiv.appendChild(item);
+    });
+  }
+
+  function updateBudgetDisplay() {
+    const totalSpent = monthlyBudget - totalBudget;
+    const percentUsed = ((totalSpent / monthlyBudget) * 100).toFixed(1);
+
+    document.getElementById("result").innerHTML = `
+      <p>📅 Monthly Budget: ${formatCurrency(monthlyBudget)}</p>
+      <p>💸 Total Spent: ${formatCurrency(totalSpent)}</p>
+      <p>💼 Total Remaining: ${formatCurrency(totalBudget)}</p>
+      <p>📊 Budget Used: ${percentUsed}%</p>
+      <p>🗓️ Weekly Budget: ${formatCurrency(weeklyBudget)}</p>
+      <p>📅 Daily Budget: ${formatCurrency(dailyBudget)}</p>
+    `;
+  }
+</script>
