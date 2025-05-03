@@ -142,32 +142,33 @@
 
       .container {
         display: flex;
-        flex-direction: column; /* Stack items vertically */
-        align-items: flex-start; /* Align all items to the left */
-        max-width: 900px;
-        margin: 60px auto 0;
-        padding: 30px;
+        flex-direction: row; 
+        align-items: flex-start;
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 20px;
         width: 100%;
         box-sizing: border-box;
         gap: 20px;
-}
-
-      
+      }
 
       .left-container,
       .right-container {
-        width: 100%;
-        display: contents; 
+        width: 50%;
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
       }
 
       .budget-container,
       .transactions-container,
       .savings-container,
+      .balance-container,
       .debts-container {
         border-radius: 10px;
         box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
         border: 1px solid rgb(255, 255, 255);
-        padding: 60px;
+        padding: 20px;
         background-color: #ffff;
       }
 
@@ -214,48 +215,31 @@
         background-color: #45a049;
       }
 
-      .result,
-      .transactions,
-      .savings,
-      .debts {
-        margin-top: 10px;
+      .balance-card {
+        background-color: #f7f7f7;
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
         text-align: center;
       }
 
-      .transaction-list,
-      .debt-list {
-        margin-top: 10px;
-        text-align: left;
+      .balance-card h2 {
+        margin-bottom: 20px;
       }
 
-      .transaction-item,
-      .debt-item {
-        background-color: #f9f9f9;
-        margin: 6px 0;
-        padding: 8px;
-        border-radius: 4px;
-        box-shadow: 0 0 3px rgba(0, 0, 0, 0.1);
-        font-size: 14px;
+      .balance-card .balance-amount {
+        font-size: 24px;
+        font-weight: bold;
+        margin: 10px 0;
+        color: #4caf50;
       }
 
-      .progress-bar-container {
-        margin-top: 8px;
-        background-color: #ddd;
-        height: 16px;
-        width: 100%;
-        border-radius: 8px;
-      }
-
-      .progress-bar {
-        background-color: #4caf50;
-        height: 100%;
-        border-radius: 8px;
-        transition: width 0.5s ease-in-out;
-      }
-
-      a {
-        color: white;
-        text-decoration: none;
+      .balance-card input {
+        padding: 10px;
+        font-size: 16px;
+        width: 80%;
+        margin-bottom: 10px;
+        text-align: center;
       }
 
       footer {
@@ -325,7 +309,7 @@
         </div>
       </div>
 
-      <!-- Right Container for Savings and Debts -->
+      <!-- Right Container for Savings, Balance Card, and Debts -->
       <div class="right-container">
         <div class="savings-container">
           <h2>Set a Savings Goal</h2>
@@ -342,6 +326,16 @@
             <div class="progress-bar-container">
               <div id="progressBar" class="progress-bar" style="width: 0%"></div>
             </div>
+          </div>
+        </div>
+
+        <!-- Balance Card -->
+        <div class="balance-container">
+          <div class="balance-card">
+            <h2>Current Balance</h2>
+            <div class="balance-amount" id="currentBalance">₱0</div>
+            <input type="number" id="balanceInput" placeholder="Edit Balance" />
+            <button onclick="updateBalance()">Update Balance</button>
           </div>
         </div>
 
@@ -373,115 +367,18 @@
     </footer>
 
     <script>
-  let transactions = [];
-  let monthlyBudget = 0;
-  let weeklyBudget = 0;
-  let dailyBudget = 0;
-  let totalBudget = 0;
+      let balance = 0;
 
-  function formatCurrency(amount) {
-    return amount.toLocaleString('en-PH', {
-      style: 'currency',
-      currency: 'PHP',
-    });
-  }
-
-  function initializeBudget() {
-    monthlyBudget = parseFloat(document.getElementById("monthlyBudget").value);
-
-    if (isNaN(monthlyBudget) || monthlyBudget <= 0) {
-      alert("Please enter a valid budget amount.");
-      return;
-    }
-
-    weeklyBudget = monthlyBudget / 4;
-    dailyBudget = monthlyBudget / 30;
-    totalBudget = monthlyBudget;
-
-    fetch('/api/budget', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ monthlyBudget, weeklyBudget, dailyBudget }),
-    })
-      .then((res) => res.json())
-      .then((data) => {
-        console.log('Budget set:', data);
-        updateBudgetDisplay();
-      })
-      .catch((err) => console.error('Error:', err));
-  }
-
-  function addTransaction() {
-    const name = document.getElementById("transactionName").value;
-    const cost = parseFloat(document.getElementById("transactionCost").value);
-    const description = document.getElementById("transactionDescription").value;
-    const currentDate = new Date();
-
-    if (!name || isNaN(cost) || cost <= 0 || !description) {
-      alert("Please fill in all fields with valid values.");
-      return;
-    }
-
-    if (cost > totalBudget) {
-      alert("Transaction exceeds your remaining budget.");
-      return;
-    }
-
-    const dateTime = currentDate.toLocaleString();
-    const transaction = { name, cost, description, dateTime };
-
-    fetch('/api/transaction', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(transaction),
-    })
-      .then((res) => res.json())
-      .then((data) => {
-        console.log('Transaction added:', data);
-        transactions.push(transaction);
-        totalBudget -= cost;
-        updateBudgetDisplay();
-        displayTransactions();
-
-        document.getElementById("transactionName").value = "";
-        document.getElementById("transactionCost").value = "";
-        document.getElementById("transactionDescription").value = "";
-      })
-      .catch((err) => console.error('Error:', err));
-  }
-
-  function displayTransactions() {
-    const transactionListDiv = document.getElementById("transactionList");
-    transactionListDiv.innerHTML = "";
-
-    if (transactions.length === 0) {
-      transactionListDiv.innerHTML = "<p>No transactions recorded yet.</p>";
-      return;
-    }
-
-    transactions.forEach((transaction) => {
-      const item = document.createElement("div");
-      item.classList.add("transaction-item");
-      item.innerHTML = `
-        <p><strong>${transaction.name}</strong> - ${formatCurrency(transaction.cost)}</p>
-        <p>${transaction.description}</p>
-        <p><small>Recorded on: ${transaction.dateTime}</small></p>
-      `;
-      transactionListDiv.appendChild(item);
-    });
-  }
-
-  function updateBudgetDisplay() {
-    const totalSpent = monthlyBudget - totalBudget;
-    const percentUsed = ((totalSpent / monthlyBudget) * 100).toFixed(1);
-
-    document.getElementById("result").innerHTML = `
-      <p>📅 Monthly Budget: ${formatCurrency(monthlyBudget)}</p>
-      <p>💸 Total Spent: ${formatCurrency(totalSpent)}</p>
-      <p>💼 Total Remaining: ${formatCurrency(totalBudget)}</p>
-      <p>📊 Budget Used: ${percentUsed}%</p>
-      <p>🗓️ Weekly Budget: ${formatCurrency(weeklyBudget)}</p>
-      <p>📅 Daily Budget: ${formatCurrency(dailyBudget)}</p>
-    `;
-  }
-</script>
+      function updateBalance() {
+        const newBalance = parseFloat(document.getElementById("balanceInput").value);
+        if (!isNaN(newBalance)) {
+          balance = newBalance;
+          document.getElementById("currentBalance").textContent = `₱${balance}`;
+          document.getElementById("balanceInput").value = '';
+        } else {
+          alert('Please enter a valid amount.');
+        }
+      }
+    </script>
+  </body>
+</html>
