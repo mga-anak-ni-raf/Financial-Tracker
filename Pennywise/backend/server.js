@@ -324,18 +324,25 @@ app.post("/api/debt", async (req, res) => {
 // GET /api/debt - Fetch all debts for logged-in user
 app.get("/api/debt", (req, res) => {
   const userId = req.session.userId;
-if (!userId) {
-  return res.status(401).json({ message: "Unauthorized" });
-}
+  if (!userId) {
+    return res.status(401).json({ message: "Unauthorized" });
+  }
 
-const query = `
-  SELECT debt_id, name, amount, interest_rate, due_date
-  FROM debts
-  WHERE user_id = $1
-  ORDER BY due_date ASC
-`;
+  const query = `
+    SELECT debt_id, name, amount, interest_rate, due_date
+    FROM debts
+    WHERE user_id = $1
+    ORDER BY due_date ASC
+  `;
 
-db.query(query, [userId])
+  db.query(query, [userId])
+    .then(result => {
+      res.json({ success: true, debts: result.rows });
+    })
+    .catch(err => {
+      console.error("Error fetching debts:", err);
+      res.status(500).json({ message: "Error fetching debts." });
+    });
 });
 
 // **Start Server**

@@ -527,6 +527,44 @@ window.addEventListener('DOMContentLoaded', () => {
           </div>`;
       }
 
+      function addDebt() {
+  const name = document.getElementById("debtName").value;
+  const amount = parseFloat(document.getElementById("debtAmount").value);
+  const interest = parseFloat(document.getElementById("debtInterest").value);
+  const dueDate = document.getElementById("debtDueDate").value;
+
+  if (!name || isNaN(amount) || isNaN(interest) || !dueDate) {
+    alert("Please fill in all debt fields with valid values.");
+    return;
+  }
+
+  const debt = { name, amount, interest, dueDate };
+
+  fetch('/api/debt', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(debt),
+  })
+    .then((res) => res.json())
+    .then((data) => {
+      console.log('Debt added:', data);
+      debts.push({
+        name,
+        amount,
+        interest,
+        dueDate: new Date(dueDate).toLocaleDateString()
+      });
+      displayDebts();
+
+      // Clear inputs
+      document.getElementById("debtName").value = "";
+      document.getElementById("debtAmount").value = "";
+      document.getElementById("debtInterest").value = "";
+      document.getElementById("debtDueDate").value = "";
+    })
+    .catch((err) => console.error('Error:', err));
+}
+
       function loadDebts() {
   fetch('/api/debt')
     .then(res => res.json())
@@ -558,14 +596,15 @@ function displayDebts() {
     return;
   }
 
-  debts.forEach(debt => {
+  debts.forEach((debt) => {
     const item = document.createElement("div");
     item.classList.add("debt-item");
     item.innerHTML = `
-      <p><strong>${debt.name}</strong> - ${formatCurrency(debt.amount)}</p>
-      <p>Interest Rate: ${debt.interest}%</p>
-      <p>Due Date: ${debt.dueDate}</p>
-    `;
+      <div>
+        <p><strong>${debt.name}</strong> - ${formatCurrency(debt.amount)}</p>
+        <p>Interest Rate: ${debt.interest}%</p>
+        <p>Due Date: ${debt.dueDate}</p>
+      </div>`;
     debtListDiv.appendChild(item);
   });
 }
