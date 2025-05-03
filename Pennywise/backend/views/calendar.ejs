@@ -22,7 +22,7 @@
     <title>Calendar with Events</title>
     <style>
         :root {
-    --primary-clr: #b38add;
+    --primary-clr: #000000;
   }
   * {
     box-sizing: border-box;
@@ -33,7 +33,7 @@
     width: 5px;
   }
   ::-webkit-scrollbar-track {
-    background: #f5f5f5;
+    background: #3d1818;
     border-radius: 5px;
   }
   ::-webkit-scrollbar-thumb {
@@ -47,7 +47,7 @@
     align-items: center;
     justify-content: center;
     padding-bottom: 30px;
-    background-color: #e2e1dc;
+    background-image: linear-gradient(#60d3e4, #5fd4ad);
   }
     header {
       position: fixed;
@@ -181,7 +181,7 @@
     color: #fff;
     display: flex;
     border-radius: 10px;
-    background-color: #373c4f;
+    border: 2px solid #000000;
   }
   .calendar {
     position: relative;
@@ -191,9 +191,9 @@
     flex-direction: column;
     flex-wrap: wrap;
     justify-content: space-between;
-    color: #878895;
+    color: #000000;
     border-radius: 5px;
-    background-color: #fff;
+    background-color: #0000;
   }
   /* set after behind the main element */
   .calendar::before,
@@ -264,19 +264,19 @@
     justify-content: center;
     cursor: pointer;
     color: var(--primary-clr);
-    border: 1px solid #f5f5f5;
+    border: 1px solid #000000;
   }
   .calendar .days .day:nth-child(7n + 1) {
-    border-left: 2px solid #f5f5f5;
+    border-left: 2px solid #000000;
   }
   .calendar .days .day:nth-child(7n) {
-    border-right: 2px solid #f5f5f5;
+    border-right: 2px solid #000000;
   }
   .calendar .days .day:nth-child(-n + 7) {
-    border-top: 2px solid #f5f5f5;
+    border-top: 2px solid #000000;
   }
   .calendar .days .day:nth-child(n + 29) {
-    border-bottom: 2px solid #f5f5f5;
+    border-bottom: 2px solid #000000;
   }
   
   .calendar .days .day:not(.prev-date, .next-date):hover {
@@ -708,9 +708,10 @@
         </label>
       </div>
       <h1><a href="/homepage">Home</a></h1>
-      <h1><a href="/Calendar">Calendar</a></h1>
+      <h1><a href="/Wallet">Wallet</a></h1>
       <h1><a href="/Stats">Stats</a></h1>
       <h1><a href="/Summary">Summary</a></h1>
+      <h1><a href="/Logout">Logout</a></h1>
     </header>
 
     <div class="container">
