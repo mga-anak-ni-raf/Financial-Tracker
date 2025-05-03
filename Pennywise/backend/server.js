@@ -57,6 +57,11 @@ app.get("/wallet", requireLogin, (req, res) => {
   res.render("wallet");
 });
 
+// Stats page
+app.get("/stats", requireLogin, (req, res) => {
+  res.render("stats");
+});
+
 // Calendar page (Protected)
 app.get("/calendar", requireLogin, (req, res) => {
   res.render("calendar", { username: req.session.username });
@@ -146,108 +151,8 @@ app.post("/login", async (req, res) => {
   }
 });
 
-// **Budget Route**
-app.post("/api/budget", (req, res) => {
-  const { monthlyBudget, weeklyBudget, dailyBudget } = req.body;
-  const username = req.session.username;
-
-  if (!username || !monthlyBudget || !weeklyBudget || !dailyBudget) {
-    return res.status(400).json({ message: "Missing data." });
-  }
-
-  const query = `
-    INSERT INTO budgets (username, monthly_budget, weekly_budget, daily_budget)
-    VALUES ($1, $2, $3, $4)
-    ON CONFLICT (username) 
-    DO UPDATE SET monthly_budget = $2, weekly_budget = $3, daily_budget = $4
-  `;
-
-  db.query(query, [username, monthlyBudget, weeklyBudget, dailyBudget])
-    .then(() => {
-      res.json({ success: true, message: "Budget saved successfully." });
-    })
-    .catch((err) => {
-      console.error("Error saving budget:", err);
-      res.status(500).json({ message: "Error saving budget." });
-    });
-});
-
-// **Transaction Route**
-app.post("/api/transaction", (req, res) => {
-  const { name, cost, description, dateTime } = req.body;
-  const username = req.session.username;
-
-  if (!username || !name || !cost || !description || !dateTime) {
-    return res.status(400).json({ message: "Missing transaction data." });
-  }
-
-  const query = `
-    INSERT INTO transactions (username, name, cost, description, date_time)
-    VALUES ($1, $2, $3, $4, $5)
-  `;
-
-  db.query(query, [username, name, cost, description, dateTime])
-    .then(() => {
-      res.json({ success: true, message: "Transaction added successfully." });
-    })
-    .catch((err) => {
-      console.error("Error saving transaction:", err);
-      res.status(500).json({ message: "Error saving transaction." });
-    });
-});
-
-// **Savings Route**
-app.post("/api/savings", (req, res) => {
-  const { goalAmount, contribution } = req.body;
-  const username = req.session.username;
-
-  if (!username || !goalAmount || !contribution) {
-    return res.status(400).json({ message: "Missing savings data." });
-  }
-
-  const query = `
-    INSERT INTO savings (username, goal_amount, contribution)
-    VALUES ($1, $2, $3)
-    ON CONFLICT (username)
-    DO UPDATE SET goal_amount = $2, contribution = $3
-  `;
-
-  db.query(query, [username, goalAmount, contribution])
-    .then(() => {
-      res.json({ success: true, message: "Savings data updated." });
-    })
-    .catch((err) => {
-      console.error("Error saving savings data:", err);
-      res.status(500).json({ message: "Error saving savings data." });
-    });
-});
-
-// **Debt Route**
-app.post("/api/debt", (req, res) => {
-  const { name, amount, interest, dueDate } = req.body;
-  const username = req.session.username;
-
-  if (!username || !name || !amount || !interest || !dueDate) {
-    return res.status(400).json({ message: "Missing debt data." });
-  }
-
-  const query = `
-    INSERT INTO debts (username, name, amount, interest, due_date)
-    VALUES ($1, $2, $3, $4, $5)
-  `;
-
-  db.query(query, [username, name, amount, interest, dueDate])
-    .then(() => {
-      res.json({ success: true, message: "Debt added successfully." });
-    })
-    .catch((err) => {
-      console.error("Error saving debt:", err);
-      res.status(500).json({ message: "Error saving debt." });
-    });
-});
-
-
 // **Start Server**
 app.listen(port, () => {
   console.log(`Server running on http://localhost:${port}`);
 });
+
