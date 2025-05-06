@@ -289,25 +289,17 @@ app.post("/api/savings", (req, res) => {
     });
 });
 
-// **Debt Route**
+  // **Debt Route**
+  // POST /api/debt - Add a new debt
 app.post("/api/debt", async (req, res) => {
   const { name, amount, interest, dueDate } = req.body;
-  const username = req.session.username;
+  const userId = req.session.userId; // Use userId directly from session
 
-  if (!username || !name || !amount || !interest || !dueDate) {
+  if (!userId || !name || !amount || !interest || !dueDate) {
     return res.status(400).json({ message: "Missing debt data." });
   }
 
   try {
-    // Fetch the user_id from the username
-    const result = await db.query("SELECT id FROM users WHERE username = $1", [username]);
-    if (result.rows.length === 0) {
-      return res.status(401).json({ message: "User not found." });
-    }
-
-    const userId = result.rows[0].id;
-
-    // Insert into debts
     const insertQuery = `
       INSERT INTO debts (user_id, name, amount, interest_rate, due_date)
       VALUES ($1, $2, $3, $4, $5)
@@ -324,6 +316,7 @@ app.post("/api/debt", async (req, res) => {
 // GET /api/debt - Fetch all debts for logged-in user
 app.get("/api/debt", (req, res) => {
   const userId = req.session.userId;
+
   if (!userId) {
     return res.status(401).json({ message: "Unauthorized" });
   }
@@ -344,6 +337,7 @@ app.get("/api/debt", (req, res) => {
       res.status(500).json({ message: "Error fetching debts." });
     });
 });
+
 
 // **Start Server**
 app.listen(port, () => {
