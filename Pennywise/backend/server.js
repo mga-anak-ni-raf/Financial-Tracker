@@ -114,12 +114,11 @@ app.post("/signup", async (req, res) => {
     console.error("Signup error:", error);
     res.status(500).json({ message: "Server error during signup." });
   }
-});
 
-const newUser = await db.query("SELECT id FROM users WHERE username = $1", [username]);
+  const newUser = await db.query("SELECT id FROM users WHERE username = $1", [username]);
 req.session.username = username;
 req.session.userId = newUser.rows[0].id; // ✅ Store userId
-
+});
 
 // **Login Route**
 app.post("/login", async (req, res) => {
@@ -147,7 +146,7 @@ app.post("/login", async (req, res) => {
 
     // Store session data
     req.session.username = user.username;
-
+    req.session.userId = user.id; // ✅ Store userId from DB
     // ✅ Send JSON instead of redirecting
     res.json({ success: true, redirect: "/homepage" });
   } catch (error) {
@@ -350,4 +349,3 @@ app.get("/api/debt", (req, res) => {
 app.listen(port, () => {
   console.log(`Server running on http://localhost:${port}`);
 });
-
