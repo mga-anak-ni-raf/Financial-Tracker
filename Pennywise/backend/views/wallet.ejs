@@ -603,7 +603,7 @@ function displayDebts() {
       <div>
         <p><strong>${debt.name}</strong> - ${formatCurrency(debt.amount)}</p>
         <p>Interest Rate: ${debt.interest}%</p>
-        <p>Due Date: ${debt.dueDate}</p>
+        <p>Due Date: ${debt.dueDate ? debt.dueDate : 'N/A'}</p>
       </div>`;
     debtListDiv.appendChild(item);
   });

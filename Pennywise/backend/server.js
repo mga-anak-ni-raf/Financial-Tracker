@@ -290,54 +290,60 @@ app.post("/api/savings", (req, res) => {
 });
 
   // **Debt Route**
-  // POST /api/debt - Add a new debt
-app.post("/api/debt", async (req, res) => {
-  const { name, amount, interest, dueDate } = req.body;
-  const userId = req.session.userId; // Use userId directly from session
+  app.post("/api/debt", async (req, res) => {
+    const { name, amount, interest, dueDate } = req.body;
+    const username = req.session.username;
 
-  if (!userId || !name || !amount || !interest || !dueDate) {
-    return res.status(400).json({ message: "Missing debt data." });
-  }
+    if (!username || !name || !amount || !interest || !dueDate) {
+      return res.status(400).json({ message: "Missing debt data." });
+    }
 
-  try {
-    const insertQuery = `
-      INSERT INTO debts (user_id, name, amount, interest_rate, due_date)
-      VALUES ($1, $2, $3, $4, $5)
+    try {
+      // Fetch the user_id from the username
+      const result = await db.query("SELECT id FROM users WHERE username = $1", [username]);
+      if (result.rows.length === 0) {
+        return res.status(401).json({ message: "User not found." });
+      }
+
+      const userId = result.rows[0].id;
+
+      // Insert into debts
+      const insertQuery = `
+        INSERT INTO debts (user_id, name, amount, interest_rate, due_date)
+        VALUES ($1, $2, $3, $4, $5)
+      `;
+      await db.query(insertQuery, [userId, name, amount, interest, dueDate]);
+
+      res.json({ success: true, message: "Debt added successfully." });
+    } catch (err) {
+      console.error("Error saving debt:", err);
+      res.status(500).json({ message: "Error saving debt." });
+    }
+  });
+
+  // GET /api/debt - Fetch all debts for logged-in user
+  app.get("/api/debt", (req, res) => {
+    const userId = req.session.userId;
+    if (!userId) {
+      return res.status(401).json({ message: "Unauthorized" });
+    }
+
+    const query = `
+      SELECT debt_id, name, amount, interest_rate AS interest, due_date
+      FROM debts
+      WHERE user_id = $1
+      ORDER BY due_date ASC
     `;
-    await db.query(insertQuery, [userId, name, amount, interest, dueDate]);
 
-    res.json({ success: true, message: "Debt added successfully." });
-  } catch (err) {
-    console.error("Error saving debt:", err);
-    res.status(500).json({ message: "Error saving debt." });
-  }
-});
-
-// GET /api/debt - Fetch all debts for logged-in user
-app.get("/api/debt", (req, res) => {
-  const userId = req.session.userId;
-
-  if (!userId) {
-    return res.status(401).json({ message: "Unauthorized" });
-  }
-
-  const query = `
-    SELECT debt_id, name, amount, interest_rate, due_date
-    FROM debts
-    WHERE user_id = $1
-    ORDER BY due_date ASC
-  `;
-
-  db.query(query, [userId])
-    .then(result => {
-      res.json({ success: true, debts: result.rows });
-    })
-    .catch(err => {
-      console.error("Error fetching debts:", err);
-      res.status(500).json({ message: "Error fetching debts." });
-    });
-});
-
+    db.query(query, [userId])
+      .then(result => {
+        res.json({ success: true, debts: result.rows });
+      })
+      .catch(err => {
+        console.error("Error fetching debts:", err);
+        res.status(500).json({ message: "Error fetching debts." });
+      });
+  });
 
 // **Start Server**
 app.listen(port, () => {
