@@ -458,23 +458,155 @@
         transactions.forEach((transaction) => {
           const item = document.createElement("div");
           item.classList.add("transaction-item");
-          item.innerHTML = `
-            <p><strong>${transaction.name}</strong> - ${formatCurrency(transaction.cost)}</p>
-            <p>${transaction.description}</p>
-            <p><small>Recorded on: ${transaction.dateTime}</small></p>
-          `;
+          item.innerHTML = 
+            `<div>
+              <p><strong>${transaction.name}</strong> - ${formatCurrency(transaction.cost)}</p>
+              <p>${transaction.description}</p>
+              <p><small>Recorded on: ${transaction.dateTime}</small></p>
+            </div>`;
           transactionListDiv.appendChild(item);
         });
       }
 
-      function updateBudgetDisplay() {
-        document.getElementById("result").innerHTML = `
-          <p>Monthly Budget: ${formatCurrency(monthlyBudget)}</p>
-          <p>Weekly Budget: ${formatCurrency(weeklyBudget)}</p>
-          <p>Daily Budget: ${formatCurrency(dailyBudget)}</p>
-          <p>Total Budget Remaining: ${formatCurrency(totalBudget)}</p>
-        `;
+      
+     
+      function loadTransactions() {
+  fetch('/api/transaction')
+    .then(res => res.json())
+    .then(data => {
+      console.log("Fetched data:", data); // 🔍 LOG THIS
+
+      if (data.success && Array.isArray(data.transactions)) {
+        transactions = data.transactions.map(t => ({
+          name: t.name,
+          cost: t.cost,
+          description: t.description,
+          dateTime: new Date(t.date_time).toLocaleString()
+        }));
+        displayTransactions();
+      } else {
+        console.error("Invalid response format or no transactions.");
       }
+    })
+    .catch(err => {
+      console.error("Error loading transactions:", err);
+    });
+}
+
+window.addEventListener('DOMContentLoaded', () => {
+  loadBudget();
+  loadTransactions();
+  loadDebts(); // 👈 ADD THIS
+});
+
+  function loadBudget() {
+    fetch('/api/budget')
+      .then(res => res.json())
+      .then(data => {
+        if (data.monthly_budget) {
+          monthlyBudget = data.monthly_budget;
+          weeklyBudget = data.weekly_budget;
+          dailyBudget = data.daily_budget;
+          totalBudget = data.monthly_budget;
+          updateBudgetDisplay();
+        }
+      })
+      .catch(err => {
+        console.error('Failed to load budget:', err);
+      });
+  }
+
+      function updateBudgetDisplay() {
+        document.getElementById("result").innerHTML = 
+          `<div>
+            <p>Monthly Budget: ${formatCurrency(monthlyBudget)}</p>
+            <p>Weekly Budget: ${formatCurrency(weeklyBudget)}</p>
+            <p>Daily Budget: ${formatCurrency(dailyBudget)}</p>
+            <p>Total Budget Remaining: ${formatCurrency(totalBudget)}</p>
+          </div>`;
+      }
+
+      function addDebt() {
+  const name = document.getElementById("debtName").value;
+  const amount = parseFloat(document.getElementById("debtAmount").value);
+  const interest = parseFloat(document.getElementById("debtInterest").value);
+  const dueDate = document.getElementById("debtDueDate").value;
+
+  if (!name || isNaN(amount) || isNaN(interest) || !dueDate) {
+    alert("Please fill in all debt fields with valid values.");
+    return;
+  }
+
+  const debt = { name, amount, interest, dueDate };
+
+  fetch('/api/debt', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(debt),
+  })
+    .then((res) => res.json())
+    .then((data) => {
+      console.log('Debt added:', data);
+      debts.push({
+        name,
+        amount,
+        interest,
+        dueDate: new Date(dueDate).toLocaleDateString()
+      });
+      displayDebts();
+
+      // Clear inputs
+      document.getElementById("debtName").value = "";
+      document.getElementById("debtAmount").value = "";
+      document.getElementById("debtInterest").value = "";
+      document.getElementById("debtDueDate").value = "";
+    })
+    .catch((err) => console.error('Error:', err));
+}
+
+      function loadDebts() {
+  fetch('/api/debt')
+    .then(res => res.json())
+    .then(data => {
+      console.log("Fetched debts:", data);
+      if (data.success && Array.isArray(data.debts)) {
+        debts = data.debts.map(debt => ({
+          name: debt.name,
+          amount: debt.amount,
+          interest: debt.interest,
+          dueDate: new Date(debt.due_date).toLocaleDateString()
+        }));
+        displayDebts();
+      } else {
+        console.error("Invalid response format or no debts.");
+      }
+    })
+    .catch(err => {
+      console.error("Error loading debts:", err);
+    });
+}
+
+function displayDebts() {
+  const debtListDiv = document.getElementById("debtList");
+  debtListDiv.innerHTML = "";
+
+  if (debts.length === 0) {
+    debtListDiv.innerHTML = "<p>No debts recorded yet.</p>";
+    return;
+  }
+
+  debts.forEach((debt) => {
+    const item = document.createElement("div");
+    item.classList.add("debt-item");
+    item.innerHTML = `
+      <div>
+        <p><strong>${debt.name}</strong> - ${formatCurrency(debt.amount)}</p>
+        <p>Interest Rate: ${debt.interest}%</p>
+        <p>Due Date: ${debt.dueDate ? debt.dueDate : 'N/A'}</p>
+      </div>`;
+    debtListDiv.appendChild(item);
+  });
+}
     </script>
   </body>
 </html>
