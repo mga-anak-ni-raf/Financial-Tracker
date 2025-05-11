@@ -23,7 +23,7 @@ db.connect()
 app.use(express.static("public")); // For serving CSS and other static files
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
-
+app.use(express.static(path.join(__dirname, "public")));
 // Session middleware
 app.use(
   session({
@@ -60,6 +60,11 @@ app.get("/wallet", requireLogin, (req, res) => {
 // Stats page
 app.get("/stats", requireLogin, (req, res) => {
   res.render("stats");
+});
+
+// About Us page
+app.get("/aboutus", requireLogin, (req, res) => {
+  res.render("aboutus");
 });
 
 // Calendar page (Protected)
