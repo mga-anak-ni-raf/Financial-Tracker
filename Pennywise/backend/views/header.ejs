@@ -1,0 +1,547 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Header/Footer</title>
+    <link href="https://cdn.lineicons.com/4.0/lineicons.css" rel="stylesheet" />
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <style>
+        @import url("https://fonts.googleapis.com/css2?family=Poppins");
+
+* {
+  box-sizing: border-box;
+}
+    body {
+        width: 100%;
+        height: 100vh;
+        margin: 0;
+        padding: 0;
+        background-image: linear-gradient(#60d3e4, #5fd4ad);
+    }
+    header {
+        background-color: #5fd4ad;
+        color: white;
+        padding: 10px;
+    }
+    .center {
+        width: 100%;
+        display: flex;
+        align-items: start;
+        justify-content: start;
+        margin: 10px 10px;
+    }
+      #toggle {
+        display: none;
+      }
+      .switch {
+        width: fit-content;
+        height: fit-content;
+        padding: 5px;
+        background: linear-gradient(rgb(211, 210, 212), rgb(245, 244, 246));
+        box-shadow: inset 0px 2px 2px 0px rgba(0, 0, 0, 0.2);
+        border-radius: 2mm;
+        display: flex;
+        perspective: 300px;
+        position: relative;
+      }
+      .mode {
+        width: 100px;
+        height: 60px;
+        background: linear-gradient(rgb(72, 160, 219), rgb(40, 235, 225));
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: 0.25s transform;
+      }
+      .mode:nth-child(1) {
+        border-radius: 2mm 0 0 2mm;
+        transform-origin: right;
+      }
+      .mode:nth-child(2) {
+        border-radius: 0 2mm 2mm 0;
+        transform-origin: left;
+      }
+      .text {
+        font-family: poppins;
+        font-size: 27px;
+        font-weight: 800;
+        color: transparent;
+        background-color: #000000;
+        background-clip: text;
+        text-shadow: 1px 1px 2px rgba(255, 255, 255, 0.3);
+      }
+      #toggle:not(:checked) ~ .switch .mode:nth-child(1) {
+        transform: rotateY(50deg);
+        background: rgb(238, 237, 239);                                                                                                                                                             
+        box-shadow: -10px 5px 20px rgba(0, 0, 0, 0.2);
+      }
+      #toggle:checked ~ .switch .mode:nth-child(2) {
+        transform: rotateY(-50deg);
+        background: rgb(238, 237, 239);
+        box-shadow: 10px 5px 20px rgba(0, 0, 0, 0.2);
+      }
+      #toggle:not(:checked) ~ .switch .mode:nth-child(1) .text {
+        background-color: #10476e;
+      }
+      #toggle:checked ~ .switch .mode:nth-child(2) .text {
+        background-color: #10476e;
+      }
+      .indicator {
+        position: absolute;
+        height: 52px;
+        width: 0;
+        background: linear-gradient(
+          to right,
+          rgb(153, 152, 153),
+          #4ac395
+        );
+        top: 50%;
+        z-index: -1;
+        transition: 0.25s;
+      }
+      .indicator.left {
+        left: 5px;
+        transform: translate(0, -50%) rotateY(-65deg);
+        transform-origin: left;
+      }
+      .indicator.right {
+        right: 5px;
+        transform: translate(0, -50%) rotateY(65deg);
+        transform-origin: right;
+      }
+      #toggle:not(:checked) ~ .switch .indicator.left {
+        width: 95px;
+      }
+      #toggle:checked ~ .switch .indicator.right {
+        width: 95px;
+      }
+      .nav-container {
+      display: flex;
+      justify-content: flex-end;
+      gap: .5rem;
+      margin-top: -70px;
+      margin-right: 30px;
+    }
+    .nav-btn {
+      background-color: white;
+      color: #5fd4ad;
+      border: none;
+      padding: 0.5rem 1rem;
+      font-weight: bold;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background-color 0.2s;
+    }
+    .nav-btn:hover {
+      background-color: #e6f4ea;
+    }
+
+    .logout {
+      background-color: #05847d;
+      color: white;
+    }
+
+    .logout:hover {
+      background: color #222;
+    }
+    .text-container {
+    border: 5px white;
+    background-color: linear-gradient(to bottom, rgb(72, 160,219), #5fd4ad);;;
+    padding: 2px;
+    border-radius: 50px;
+    width: 70%;
+    margin: 50px auto 0 auto;
+    text-align: center;
+    font-size: 20px;
+    color: #000000;
+    letter-spacing: 2px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    }
+    .outside-heading {
+    margin-top: 20px; /* Adjust to your liking */
+    text-align: center;  /* Center the heading */
+    font-size: 40px;  /* Adjust the font size */
+    }
+    .mission-vision {
+    display: flex;
+    justify-content: center;
+    gap: 50px; 
+    margin-top: 50px;
+    }
+    .mission, .vision {
+    width: 800px; 
+    padding: 60px;
+    border-radius: 6px;
+    border:50px 50% #ffffff;
+    text-align: center;
+    background-color:linear-gradient(to bottom, rgb(72, 160,219), #5fd4ad);;
+    margin-top: 30px;
+    }
+/* Mission Border */
+    .mission {
+    border: 50px 50% #ffffff; /* Border for the Mission */
+    border-radius: 50px; /* Rounded corners for the Mission */
+    background-color: linear-gradient(to bottom, rgb(72, 160,219), #5fd4ad);;;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);   
+    }
+    .mission h3 {
+    font-size: 50px;
+    font-family: 'Epilogue', sans-serif;
+    font-weight: bold;
+    color: #000000;
+    margin-bottom: 20px;
+    letter-spacing: 5px;
+    }   
+    .mission p {
+    font-size: 20px;
+    font-family: 'Epilogue', sans-serif;
+    color: #ffffff;
+    line-height: 1.6;
+    font-style: italic;
+    }
+/* Vision Border */
+    .vision {
+    border: 5px 10% #ffffff; /* Border for the Vision */
+    border-radius: 50px; /* Rounded corners for the Vision */
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);   
+    }
+    .vision h3 {
+    font-size: 50px;
+    font-family: 'Epilogue', sans-serif;
+    font-weight: bold;
+    color: #000000;
+    margin-bottom: 20px;
+    letter-spacing: 5px;
+    }
+    .vision p {
+    font-size: 20px;
+    font-family: 'Epilogue', sans-serif;
+    color: #ffffff;
+    line-height: 1.6;
+    font-style: italic;
+    }
+    .our-story {
+    width: 100%;                   
+    margin: 50px auto;   
+    max-width: 900px; 
+    padding: 50px;           
+    border: 50px 50% #ffffff;
+    border-width: 5px;
+    border-radius: 50px;
+    background-color: linear-gradient(to bottom, rgb(72, 160,219), #5fd4ad);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);   /* Optional shadow for depth */
+    text-align: center;
+    }
+    .our-story h2 {
+    font-family: 'Epilogue', serif;
+    font-size: 30px;
+    margin-bottom: 30px;
+    color: rgb(236, 243, 243);
+    letter-spacing: 5px;
+    }
+    .our-story p {
+    font-size: 20px;
+    line-height: 150%;
+    font-family: 'Epilogue', sans-serif;
+    font-style: italic;
+    }
+    .team-intro {
+    margin-top: 20px;
+    font-size: 50px;
+    color: #ffffff;
+    text-align: center;
+    border: #000000;
+    border-radius: 20px;
+    }
+    .team-description {
+    text-align: center;
+    font-size: 20px;
+    margin-bottom: 30px;
+    color: #333;
+    }
+    .team-row {
+    display: block;
+    justify-content: space-between  ;
+    gap: 100px; /* Ensure the gap is similar between team members */
+    padding: 50px;
+    margin: 20px;
+    width: 100%;
+    }
+    .team-member {
+    text-align: center;
+    width: 100%;  /* Set width for additional images, same as team members */
+    padding: 100px;
+    border: 5px solid rgb(72, 160, 219); /* Border around images */
+    border-radius: 20px;
+    background-color: rgb(72, 160, 219);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    animation: flipIn 0.6s ease-in-out;
+    animation-delay: 0.2s;
+    animation-fill-mode: both;
+    }
+    .team-member img {
+    width: 80%;    /* Ensure the image takes full width of the container */
+    height: auto;
+    border-radius: 10px;
+    }
+    .team-member p {
+    margin-top: 100px;
+    font-weight: bold;
+    color: #333;
+    font-size: 25px;
+    font-family: 'Epilogue';
+    }   
+/* Additional images section */
+    .additional-image-container {
+    display: flex;
+    justify-content: center;  /* Ensures images align properly */
+    gap: 40px;  /* Space between images */
+    margin-top: 30px;
+    flex-wrap: wrap;
+    }
+    .additional-image-item {
+    text-align: center;
+    width: 30%;  /* Set width for additional images, same as team members */
+    padding: 10px;
+    border: 2px solid rgb(72, 160, 219); /* Border around images */
+    border-radius: 20px;
+    background-color: rgb(72, 160, 219);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    }
+    .additional-image-item img {
+    width: 60%;  /* Ensure the image takes full width of its container */
+    height: auto;
+    border-radius: 10px;
+    }
+    .additional-image-item p {
+    margin-top: 40px;
+    font-weight: bold;
+    color: #333;
+    font-size: 30px;
+    }
+    .additional-image-item {
+    opacity: 0;
+    transform: translateY(50px); /* Start position below */
+    animation: fadeInUp 1s forwards;
+    animation-delay: 0.5s; /* Delay for each image */
+    }
+    @keyframes fadeInUp {
+    0% {
+    opacity: 0;
+    transform: translateY(50px); /* Start below */
+    }
+    100% {
+    opacity: 1;
+    transform: translateY(0); /* End at normal position */
+    }
+}
+/* Trigger the animation when in view */
+    .additional-image-item.in-view {
+    animation: fadeInUp 1s forwards;
+    }
+    .team-row, .additional-team-row {
+    display: flex;
+    justify-content: center;
+    gap: 30px;
+    padding: 20px;
+    flex-wrap: wrap;
+    }
+    .team-member {
+    text-align: center;
+    max-width: 200px;
+    }
+
+    .team-member img {
+    width: 100%;
+    height: auto;
+    border-radius: 10px;
+    border: 3px solid #ccc;
+    }
+
+.team-member p {
+  margin-top: 10px;
+  font-weight: bold;
+}
+
+.team-button {
+  padding: 12px 24px;
+  font-size: 16px;
+  font-family: 'Epilogue', sans-serif;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  background: linear-gradient(to bottom, #48a0db, #5fd4ad);
+  cursor: pointer;
+  transition: background 0.3s ease;
+}
+
+.team-button:hover {
+  background-color: linear-gradient(to bottom, rgb(72, 160,219), #5fd4ad);
+}
+@keyframes fadeSlideUp {
+  from {
+    opacity: 0;
+    transform: translateY(50px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.mission {
+  animation-delay: 0.3s;
+}
+
+.vision {
+  animation-delay: 0.6s;
+}
+.our-story {
+  animation: fadeSlideUp 1s ease forwards;
+  opacity: 0;
+  animation-delay: 0.9s; /* Optional delay */
+}
+
+@keyframes scaleFadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+.our-story {
+  animation: scaleFadeIn 1s ease forwards;
+  opacity: 0;
+  animation-delay: 0.8s; /* optional */
+}
+@keyframes flipIn {
+  from {
+    transform: rotateY(90deg);
+    opacity: 0;
+  }
+  to {
+    transform: rotateY(0deg);
+    opacity: 1;
+  }
+}
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+footer {
+  background-color: #5fd4ad;
+  color: rgb(0, 0, 0);
+  text-align: center;
+  padding: 20px;
+  font-size: 18px;
+  border-bottom-left-radius: 20px;
+  border-bottom-right-radius: 20px;
+}
+</style>
+
+</head>
+<body>
+
+<header>
+  <div class="center">
+    <input type="checkbox" name="toggle" id="toggle" />
+    <label for="toggle" class="switch">
+      <div class="mode">
+        <div class="text">ctrl</div>
+      </div>
+      <div class="mode">
+        <div class="text">save</div>
+      </div>
+      <div class="indicator left"></div>
+      <div class="indicator right"></div>
+    </label>
+  </div>
+  </header>
+
+    <div class="nav-container">
+      <button onclick="goHome()" class="nav-btn">Home</button>
+      <button onclick="goStats()" class="nav-btn">Stats</button>
+      <button onclick="goCalendar()" class="nav-btn">Calendar</button>
+      <button onclick="goWallet()" class="nav-btn">Wallet</button>
+      <button onclick="logOut()" class="nav-btn logout">Logout</button>
+    </div>
+<footer>
+    <div class="text-container">
+    <h2 class="outside-heading">About us</h2>
+    <p>We started with a simple mission: to make personal finance accessible 
+        for everyone. Specifically, For Students who struggles to track their monthly Allowance, We struggle to save up for things we want.
+        <br> </p>
+    <section>
+    </section>
+  </div>.
+<div class="mission-vision">
+    <div class="mission">
+      <h3>Mission</h3>
+      <p>Our mission is to help you take control of your financial future. Whether you're saving for a big goal or just trying to keep track of your daily expenses, we provide the tools you need to make informed decisions and achieve financial stability.</p>
+    </div>
+    <div class="vision">
+      <h3>Vision</h3>
+      <p>We believe that everyone should have the ability to manage their finances effortlessly. By combining simplicity with powerful tracking features, we hope to make financial management accessible for everyone.</p>
+    </div>
+  </div>
+<section class="our-story">
+    <h2>Our Story</h2>
+    <p>
+      ctrl save started with a simple idea: to make personal finance intuitive, accessible, and empowering. What began as a passion project quickly grew into a full platform that helps users take control of their savings journey with confidence and clarity.
+    </p>
+  </section>
+  <h3 class="team-intro">Meet our team</h3>
+  <p class="team-description">A passionate group committed to building meaningful experiences.</p>
+
+<div class="team-row">
+  <div class="team-member">
+    <img src="/DRE.jpg" alt="Team Member 1">
+    <p>Andrei</p>
+      <p>Leader/Full Stack</p>
+      <button class="team-button">Portfolio</button>
+  </div>
+  <div class="team-member">
+    <img src="/EXE.jpg" alt="Team Member 2">
+    <p>Exequel</p>
+      <p>Backend <br> Developer</p>
+      <button class="team-button">Portfolio</button>
+  </div>
+  <div class="team-member">
+    <img src="/RAF.JPG" alt="Team Member 3">
+    <p>Rafael Jr.</p>
+      <p>Backend Developer</p>
+      <button class="team-button">Portfolio</button>
+  </div>
+  <div class="additional-image-container">
+  <div class="additional-image-item">
+    <img src="/GEN.jpg" alt="Image 1">
+    <p>Genelyn</p>
+      <p>Frontend Developer</p>
+      <button class="team-button">Portfolio</button>
+</div>
+  <div class="additional-image-item">
+    <img src="/LEX.jpg" alt="Image 2">
+    <p>Alexa</p>
+      <p>Frontend Developer</p>
+      <button class="team-button">Portfolio</button>
+
+  </div>
+
+</div>
+
+</div>
+  <p>&copy; 2025 Ctrl Save. All rights reserved.</p>
+</footer>
+</body>
+</html>
