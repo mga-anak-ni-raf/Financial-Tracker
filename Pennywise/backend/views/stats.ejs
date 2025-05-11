@@ -13,16 +13,14 @@
       box-sizing: border-box;
     }
 
-      body {
+    body {
       margin: 0;
       font-family: 'Epilogue', sans-serif;
       background: linear-gradient(to bottom,#60d3e4,#5fd4ad);
       background-repeat: no-repeat;
       background-attachment: fixed;
       min-height: 100vh;
-}
-
-
+    }
 
     header {
       background-color: #5fd4ad;
@@ -95,17 +93,17 @@
       display: flex;
       flex-direction: column;
       min-height: 100vh; /* full viewport height */
-}
+    }
 
-      main {
+    main {
      flex: 1; /* takes up all remaining space */
-}
+    }
 
     footer {
-    background-color: #5fd4ad;
-    color: white;
-    text-align: center;
-    padding: 1rem 0;
+      background-color: #5fd4ad;
+      color: white;
+      text-align: center;
+      padding: 1rem 0;
     }
 
     .bar-box,
@@ -127,7 +125,7 @@
     .line-box {
       max-width: 700px;  /* ↓ was 1000px, now smaller */
       width: 90%;
-       margin: 2rem auto;
+      margin: 2rem auto;
       padding: 2rem;
       background-color: whitesmoke;
       border-radius: 20px;
@@ -148,7 +146,8 @@
     
     canvas {
       width: 100% !important;
-      height: 600% !important;
+      height: 300px !important;
+      max-height: 300px !important;
     }
 
     .totals {
@@ -186,18 +185,38 @@
       resize: none;
       margin-bottom: 0.5rem;
     }
-  .note {
-  background-color: #5f5f5f;
-  padding: 1rem;
-  margin: 0.5rem 0;
-  border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-}
+    .note {
+      background-color: #f5f5f5;
+      padding: 1rem;
+      margin: 0.5rem 0;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
 
-  
-      
-
+    .transaction-item {
+      background-color: #f5f5f5;
+      padding: 0.75rem;
+      margin: 0.5rem 0;
+      border-radius: 8px;
+      border-left: 4px solid #5fd4ad;
+    }
     
+    .transaction-item h4 {
+      margin: 0 0 0.5rem 0;
+      display: flex;
+      justify-content: space-between;
+    }
+    
+    .transaction-item p {
+      margin: 0.25rem 0;
+      color: #555;
+      font-size: 0.9rem;
+    }
+
+    .transaction-amount {
+      font-weight: bold;
+      color: #5fd4ad;
+    }
   </style>
 </head>
 <body>
@@ -229,6 +248,11 @@
   <p id="lineTotalText" class="totals"></p>
 </div>
 
+<div class="line-box">
+  <canvas id="expensesChart"></canvas>
+  <p id="expensesTotalText" class="totals"></p>
+</div>
+
 <div class="pie-box">
   <canvas id="pieChart"></canvas>
   <p id="pieTotalText" class="totals"></p>
@@ -243,7 +267,7 @@
   </div>
 
   <div class="transactions">
-    <h3>Online Transactions</h3>
+    <h3>Recent Transactions</h3>
     <div class="transaction-list" id="transactionsContainer"></div>
   </div>
 </div>
@@ -266,10 +290,10 @@
   }
 
   function logOut() {
-    alert("Logging out...");
-    window.location.href = "/index";
+    window.location.href = "/logout";
   }
 
+  // Sample data (will be replaced with actual data from API)
   let labelsMonthly = ["January", "February", "March", "April", "May", "June"];
   let labelsWeekly = ["Week 1", "Week 2", "Week 3", "Week 4", "Week 5", "Week 6"];
   let labelsDaily = ["Day 1", "Day 2", "Day 3", "Day 4", "Day 5", "Day 6"];
@@ -277,6 +301,7 @@
   const barCtx = document.getElementById("barChart").getContext("2d");
   const lineCtx = document.getElementById("lineChart").getContext("2d");
   const pieCtx = document.getElementById("pieChart").getContext("2d");
+  const expensesCtx = document.getElementById("expensesChart").getContext("2d");
 
   let barChart = new Chart(barCtx, {
     type: "bar",
@@ -284,12 +309,13 @@
       labels: labelsMonthly,
       datasets: [{
         label: "Balance",
-        data: [500, 300, 700, 200, 450, 300],
+        data: [],
         backgroundColor: "#5fd4ad"
       }]
     },
     options: {
       responsive: true,
+      maintainAspectRatio: true,
       plugins: {
         title: {
           display: true,
@@ -304,20 +330,62 @@
     data: {
       labels: labelsMonthly,
       datasets: [{
-        label: "Expenses", // Changed from "Debt" to "Expenses"
-        data: [5, 10, 4, 8, 3, 7], // You can adjust these numbers as needed
-        borderColor: "#5fd4ad",
-        backgroundColor: "5fd4ad",
-        fill: true,
-        tension: 0.4
+        label: "Expenses",
+        data: [],
+        borderColor: "#FF5733",
+        backgroundColor: "rgba(255, 87, 51, 0.2)",
+        tension: 0.3,
+        fill: true
       }]
     },
     options: {
       responsive: true,
+      maintainAspectRatio: false,
       plugins: {
         title: {
           display: true,
-          text: "Monthly Expenses - Line Chart" // Updated title
+          text: "Monthly Expenses - Line Chart"
+        }
+      }
+    }
+  });
+
+  // Create the expenses chart
+  let expensesChart = new Chart(expensesCtx, {
+    type: "line",
+    data: {
+      labels: [],
+      datasets: [{
+        label: "Transaction Expenses",
+        data: [],
+        borderColor: "#4CAF50",
+        backgroundColor: "rgba(76, 175, 80, 0.2)",
+        tension: 0.3,
+        fill: true
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        title: {
+          display: true,
+          text: "Transactions Over Time"
+        }
+      },
+      scales: {
+        y: {
+          beginAtZero: true,
+          title: {
+            display: true,
+            text: 'Amount ($)'
+          }
+        },
+        x: {
+          title: {
+            display: true,
+            text: 'Date'
+          }
         }
       }
     }
@@ -329,7 +397,7 @@
       labels: ["Savings", "Other Expenses", "Investments", "Emergency Fund"],
       datasets: [{
         label: "Savings Allocation",
-        data: [1000, 1500, 1200, 2000],
+        data: [],
         backgroundColor: ["#FFEB3B", "#FF5733", "#4CAF50", "#00BCD4"]
       }]
     },
@@ -344,34 +412,220 @@
     }
   });
 
-  // Defining the changeView function to handle view changes
+  // Function to handle view changes
   function changeView(view) {
     if (view === 'weekly') {
       barChart.data.labels = labelsWeekly;
       lineChart.data.labels = labelsWeekly;
-      barChart.data.datasets[0].data = [300, 250, 400, 150, 500, 320];
-      lineChart.data.datasets[0].data = [7, 5, 8, 6, 4, 9];
       barChart.options.plugins.title.text = "Weekly Balance - Bar Chart";
       lineChart.options.plugins.title.text = "Weekly Expenses - Line Chart";
+      fetchTransactionData('weekly');
     } else if (view === 'monthly') {
       barChart.data.labels = labelsMonthly;
       lineChart.data.labels = labelsMonthly;
-      barChart.data.datasets[0].data = [500, 300, 700, 200, 450, 300];
-      lineChart.data.datasets[0].data = [5, 10, 4, 8, 3, 7];
       barChart.options.plugins.title.text = "Monthly Balance - Bar Chart";
       lineChart.options.plugins.title.text = "Monthly Expenses - Line Chart";
+      fetchTransactionData('monthly');
     } else if (view === 'daily') {
       barChart.data.labels = labelsDaily;
       lineChart.data.labels = labelsDaily;
-      barChart.data.datasets[0].data = [200, 100, 400, 150, 300, 200];
-      lineChart.data.datasets[0].data = [3, 6, 2, 5, 4, 7];
       barChart.options.plugins.title.text = "Daily Balance - Bar Chart";
       lineChart.options.plugins.title.text = "Daily Expenses - Line Chart";
+      fetchTransactionData('daily');
     }
 
     barChart.update();
     lineChart.update();
   }
+
+  // Function to fetch transaction data
+  async function fetchTransactionData(timeframe = 'monthly') {
+    try {
+      const response = await fetch('/api/transaction');
+      const data = await response.json();
+      
+      if (data.success && data.transactions && data.transactions.length > 0) {
+        // Process transactions for the expenses chart
+        displayTransactionsChart(data.transactions, timeframe);
+        
+        // Display recent transactions in the list
+        displayTransactionsList(data.transactions);
+      } else {
+        console.error("No transactions found or error in API response");
+      }
+    } catch (error) {
+      console.error("Error fetching transaction data:", error);
+    }
+  }
+
+  // Function to display transactions in the chart
+  function displayTransactionsChart(transactions, timeframe = 'monthly') {
+    // Sort transactions by date
+    transactions.sort((a, b) => new Date(a.date_time) - new Date(b.date_time));
+    
+    // Format the data according to the selected timeframe
+    let formattedData = {};
+    let labels = [];
+    let data = [];
+    
+    transactions.forEach(transaction => {
+      const date = new Date(transaction.date_time);
+      let key;
+      
+      // Format the date key based on the timeframe
+      if (timeframe === 'daily') {
+        key = `${date.getMonth() + 1}/${date.getDate()}/${date.getFullYear()}`;
+      } else if (timeframe === 'weekly') {
+        // Get the week number
+        const firstDayOfYear = new Date(date.getFullYear(), 0, 1);
+        const pastDaysOfYear = (date - firstDayOfYear) / 86400000;
+        const weekNum = Math.ceil((pastDaysOfYear + firstDayOfYear.getDay() + 1) / 7);
+        key = `Week ${weekNum}, ${date.getFullYear()}`;
+      } else { // monthly
+        key = `${date.toLocaleString('default', { month: 'short' })} ${date.getFullYear()}`;
+      }
+      
+      // Aggregate costs by the key
+      if (!formattedData[key]) {
+        formattedData[key] = 0;
+      }
+      formattedData[key] += parseFloat(transaction.cost);
+    });
+    
+    // Convert the aggregated data to arrays for Chart.js
+    for (const [key, value] of Object.entries(formattedData)) {
+      labels.push(key);
+      data.push(value);
+    }
+    
+    // Update the expenses chart
+    expensesChart.data.labels = labels;
+    expensesChart.data.datasets[0].data = data;
+    
+    // Set the chart title based on timeframe
+    let titlePrefix;
+    if (timeframe === 'daily') {
+      titlePrefix = 'Daily';
+    } else if (timeframe === 'weekly') {
+      titlePrefix = 'Weekly';
+    } else {
+      titlePrefix = 'Monthly';
+    }
+    expensesChart.options.plugins.title.text = `${titlePrefix} Transaction Expenses`;
+    
+    // Calculate the total expenses
+    const totalExpenses = data.reduce((sum, value) => sum + value, 0);
+    document.getElementById('expensesTotalText').innerText = `Total Expenses: $${totalExpenses.toFixed(2)}`;
+    
+    expensesChart.update();
+  }
+
+  // Function to display transactions in the list
+  function displayTransactionsList(transactions) {
+    const container = document.getElementById('transactionsContainer');
+    container.innerHTML = ''; // Clear existing content
+    
+    // Sort transactions by date (newest first)
+    transactions.sort((a, b) => new Date(b.date_time) - new Date(a.date_time));
+    
+    // Take only the 5 most recent transactions
+    const recentTransactions = transactions.slice(0, 5);
+    
+    if (recentTransactions.length === 0) {
+      container.innerHTML = '<p>No transactions found.</p>';
+      return;
+    }
+    
+    recentTransactions.forEach(transaction => {
+      const date = new Date(transaction.date_time);
+      const formattedDate = date.toLocaleDateString('en-US', { 
+        year: 'numeric', 
+        month: 'short', 
+        day: 'numeric' 
+      });
+      
+      const transactionElement = document.createElement('div');
+      transactionElement.className = 'transaction-item';
+      transactionElement.innerHTML = `
+        <h4>
+          ${transaction.name} 
+          <span class="transaction-amount">$${parseFloat(transaction.cost).toFixed(2)}</span>
+        </h4>
+        <p>${transaction.description}</p>
+        <p><small>${formattedDate}</small></p>
+      `;
+      
+      container.appendChild(transactionElement);
+    });
+  }
+
+  // Function to add a note (placeholder function)
+  function addNote() {
+    const noteInput = document.getElementById('noteInput');
+    const noteText = noteInput.value.trim();
+    
+    if (noteText) {
+      const notesContainer = document.getElementById('notesContainer');
+      const noteElement = document.createElement('div');
+      noteElement.className = 'note';
+      noteElement.textContent = noteText;
+      
+      notesContainer.prepend(noteElement);
+      noteInput.value = '';
+    }
+  }
+
+  // Function to fetch general stats
+  async function fetchStats() {
+    try {
+      const res = await fetch('/api/stats');
+      const result = await res.json();
+
+      if (result.success) {
+        const stats = result.data;
+
+        // Update charts with real data
+        barChart.data.datasets[0].data = [
+          stats.monthlyBudget - stats.totalSpent, // balance estimate
+          stats.totalSpent,
+          stats.savingsContribution,
+          stats.totalDebt,
+          stats.monthlyBudget,
+          stats.savingsGoal
+        ];
+        barChart.update();
+
+        lineChart.data.datasets[0].data = [
+          stats.totalSpent, stats.totalSpent * 0.9, stats.totalSpent * 1.1,
+          stats.totalSpent * 0.8, stats.totalSpent * 1.2, stats.totalSpent
+        ];
+        lineChart.update();
+
+        pieChart.data.datasets[0].data = [
+          stats.savingsContribution,
+          stats.totalSpent - stats.savingsContribution,
+          stats.savingsGoal - stats.savingsContribution,
+          stats.totalDebt
+        ];
+        pieChart.update();
+
+        // Update text labels
+        document.getElementById("barTotalText").innerText = `Balance Estimate: $${(stats.monthlyBudget - stats.totalSpent).toFixed(2)}`;
+        document.getElementById("lineTotalText").innerText = `Total Spent: $${stats.totalSpent.toFixed(2)}`;
+        document.getElementById("pieTotalText").innerText = `Total Savings: $${stats.savingsContribution.toFixed(2)}`;
+      } else {
+        console.error("Failed to load stats.");
+      }
+    } catch (error) {
+      console.error("Error fetching stats:", error);
+    }
+  }
+
+  // Initialize on page load
+  window.onload = function() {
+    fetchStats();
+    fetchTransactionData('monthly'); // Default to monthly view
+  };
 </script>
 </body>
 </html>

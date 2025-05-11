@@ -345,6 +345,65 @@ app.post("/api/savings", (req, res) => {
       });
   });
 
+//STATS route
+// This route fetches the user's budget, total spent, savings goal, and total debt
+app.get("/api/stats", async (req, res) => {
+  const userId = req.session.userId;
+
+  if (!userId) {
+    return res.status(401).json({ message: "Unauthorized" });
+  }
+
+  try {
+    const [budgetRes, transactionRes, savingsRes, debtRes] = await Promise.all([
+      db.query("SELECT monthly_budget FROM budgets WHERE user_id = $1", [userId]),
+      db.query("SELECT SUM(cost) AS total_spent FROM transactions WHERE user_id = $1", [userId]),
+      db.query("SELECT goal_amount, contribution FROM savings WHERE user_id = $1", [userId]),
+      db.query("SELECT SUM(amount) AS total_debt FROM debts WHERE user_id = $1", [userId]),
+    ]);
+
+    res.json({
+      success: true,
+      data: {
+        monthlyBudget: budgetRes.rows[0]?.monthly_budget || 0,
+        totalSpent: transactionRes.rows[0]?.total_spent || 0,
+        savingsGoal: savingsRes.rows[0]?.goal_amount || 0,
+        savingsContribution: savingsRes.rows[0]?.contribution || 0,
+        totalDebt: debtRes.rows[0]?.total_debt || 0,
+      }
+    });
+  } catch (error) {
+    console.error("Error fetching stats:", error);
+    res.status(500).json({ message: "Error fetching stats." });
+  }
+});
+
+// 🆕 Monthly Expenses Data for Chart
+app.get("/api/stats/expenses", async (req, res) => {
+  const userId = req.session.userId;
+
+  if (!userId) {
+    return res.status(401).json({ message: "Unauthorized" });
+  }
+
+  try {
+    const result = await db.query(`
+      SELECT 
+        TO_CHAR(date_time, 'Mon YYYY') AS month,
+        SUM(cost)::float AS total
+      FROM transactions
+      WHERE "user" = $1
+      GROUP BY month, DATE_TRUNC('month', date_time)
+      ORDER BY DATE_TRUNC('month', date_time)
+    `, [userId]);
+
+    res.json({ success: true, expenses: result.rows });
+  } catch (error) {
+    console.error("Error fetching monthly expenses:", error);
+    res.status(500).json({ message: "Error fetching expenses." });
+  }
+});
+
 // **Start Server**
 app.listen(port, () => {
   console.log(`Server running on http://localhost:${port}`);
