@@ -9,41 +9,125 @@
       rel="stylesheet"
       />
   <style>
-    * {
-      box-sizing: border-box;
-    }
-
-    body {
-      margin: 0;
-      font-family: 'Epilogue', sans-serif;
-      background: linear-gradient(to bottom,#60d3e4,#5fd4ad);
-      background-repeat: no-repeat;
-      background-attachment: fixed;
-      min-height: 100vh;
+   * {
+  box-sizing: border-box;
+  font-family: "Poppins", sans-serif;
 }
+    body {
+        position: relative;
+        min-height: 100vh;
+        margin: 0;
+        padding: 0;
+        align-items: center;
+        justify-content: center;
+        background: linear-gradient(#60d3e4, #5fd4ad);
+        background-attachment: fixed;
+        background-repeat: no-repeat;
+      }
     header {
-      background-color: #5fd4ad;
-      color: white;
-      padding: 15px;
+        background-color: #5fd4ad;
+        color: white;
+        padding: 10px;
     }
-
-    header div {
+    .center {
+        width: 100%;
+        display: flex;
+        align-items: start;
+        justify-content: start;
+        margin: 10px 10px;
+    }
+      #toggle {
+        display: none;
+      }
+      .switch {
+        width: fit-content;
+        height: fit-content;
+        padding: 5px;
+        background: linear-gradient(rgb(211, 210, 212), rgb(245, 244, 246));
+        box-shadow: inset 0px 2px 2px 0px rgba(0, 0, 0, 0.2);
+        border-radius: 2mm;
+        display: flex;
+        perspective: 300px;
+        position: relative;
+      }
+      .mode { 
+        width: 100px;
+        height: 60px;
+        background: linear-gradient(rgb(72, 160, 219), rgb(40, 235, 225));
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: 0.25s transform;
+      }
+      .mode:nth-child(1) {
+        border-radius: 2mm 0 0 2mm;
+        transform-origin: right;
+      }
+      .mode:nth-child(2) {
+        border-radius: 0 2mm 2mm 0;
+        transform-origin: left;
+      }
+      .text {
+        font-family: poppins;
+        font-size: 27px;
+        font-weight: 800;
+        color: transparent;
+        background-color: #000000;
+        background-clip: text;
+        text-shadow: 1px 1px 2px rgba(255, 255, 255, 0.3);
+      }
+      #toggle:not(:checked) ~ .switch .mode:nth-child(1) {
+        transform: rotateY(50deg);
+        background: rgb(238, 237, 239);                                                                                                                                                             
+        box-shadow: -10px 5px 20px rgba(0, 0, 0, 0.2);
+      }
+      #toggle:checked ~ .switch .mode:nth-child(2) {
+        transform: rotateY(-50deg);
+        background: rgb(238, 237, 239);
+        box-shadow: 10px 5px 20px rgba(0, 0, 0, 0.2);
+      }
+      #toggle:not(:checked) ~ .switch .mode:nth-child(1) .text {
+        background-color: #10476e;
+      }
+      #toggle:checked ~ .switch .mode:nth-child(2) .text {
+        background-color: #10476e;
+      }
+      .indicator {
+        position: absolute;
+        height: 52px;
+        width: 0;
+        background: linear-gradient(
+          to right,
+          rgb(153, 152, 153),
+          #4ac395
+        );
+        top: 50%;
+        z-index: -1;
+        transition: 0.25s;
+      }
+      .indicator.left {
+        left: 5px;
+        transform: translate(0, -50%) rotateY(-65deg);
+        transform-origin: left;
+      }
+      .indicator.right {
+        right: 5px;
+        transform: translate(0, -50%) rotateY(65deg);
+        transform-origin: right;
+      }
+      #toggle:not(:checked) ~ .switch .indicator.left {
+        width: 95px;
+      }
+      #toggle:checked ~ .switch .indicator.right {
+        width: 95px;
+      }
+      .nav-container {
       display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding:20px;
+      justify-content: flex-end;
+      gap: .5rem;
+      margin-top: -70px;
+      margin-right: 30px;
     }
-
-    header h1 {
-      margin: 0;
-      font-size: 1.5rem;
-    }
-
-    .nav-container {
-      display: flex;
-      gap: 1rem;
-    }
-
     .nav-btn {
       background-color: white;
       color: #5fd4ad;
@@ -54,7 +138,6 @@
       cursor: pointer;
       transition: background-color 0.2s;
     }
-
     .nav-btn:hover {
       background-color: #e6f4ea;
     }
@@ -67,12 +150,12 @@
     .logout:hover {
       background: color #222;
     }
-
-    .view-toggle {
+   .view-toggle {
       display: flex;
       justify-content: center;
       gap: 1rem;
       margin: 1rem 0;
+      margin-top: 70px;
     }
 
     .toggle-btn {
@@ -221,16 +304,28 @@
 <body>
 
 <header>
-  <div>
-    <h1>Statistical Dashboard</h1>
+  <div class="center">
+    <input type="checkbox" name="toggle" id="toggle" />
+    <label for="toggle" class="switch">
+      <div class="mode">
+        <div class="text">ctrl</div>
+      </div>
+      <div class="mode">
+        <div class="text">save</div>
+      </div>
+      <div class="indicator left"></div>
+      <div class="indicator right"></div>
+    </label>
+  </div>
+  </header>
+
     <div class="nav-container">
       <button onclick="goHome()" class="nav-btn">Home</button>
+      <button onclick="goStats()" class="nav-btn">Stats</button>
       <button onclick="goCalendar()" class="nav-btn">Calendar</button>
       <button onclick="goWallet()" class="nav-btn">Wallet</button>
       <button onclick="logOut()" class="nav-btn logout">Logout</button>
     </div>
-  </div>
-</header>
 
 <div class="view-toggle">
   <button class="toggle-btn" onclick="changeView('monthly')">Monthly</button>
