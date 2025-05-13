@@ -350,6 +350,8 @@ app.post("/api/savings", (req, res) => {
       });
   });
 
+
+  
 //STATS route
 // This route fetches the user's budget, total spent, savings goal, and total debt
 app.get("/api/stats", async (req, res) => {
