@@ -21,12 +21,12 @@
     />
     <title>Calendar with Events</title>
     <style>
-        :root {
+                  :root {
     --primary-clr: #000000;
-  }
-  * {
-    box-sizing: border-box;
-    font-family: "Poppins", sans-serif;
+}
+* {
+  box-sizing: border-box;
+  font-family: "Poppins", sans-serif;
   }
   /* nice scroll bar */
   ::-webkit-scrollbar {
@@ -39,41 +39,31 @@
   ::-webkit-scrollbar-thumb {
     background: var(--primary-clr);
     border-radius: 5px;
-  }
-  body {
-    position: relative;
-    min-height: 100vh;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding-bottom: 30px;
-    background-image: linear-gradient(#60d3e4, #5fd4ad);
-  }
-    header {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      background-color: #5fd4ad;
-      color: white;
-      padding: 20px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      font-size: 14px;
-      font-weight: 100;
-      }
-      header h1 {
+}
+    body {
+        position: relative;
+        height: 100vh;
         margin: 0;
-      }
-      header h1 a {
-        color:#000000;
-      }
-      .toggle-container {
-        display: flex;
+        padding: 0;
         align-items: center;
+        justify-content: center;
+        background-image: linear-gradient(#60d3e4, #5fd4ad);
+    }
+    header {
+        background-color: #5fd4ad;
+        color: white;
+        padding: 10px;
+    }
+    .center {
+        width: 100%;
+        display: flex;
+        align-items: start;
+        justify-content: start;
+        margin: 10px 10px;
+    }
+      #toggle {
+        display: none;
       }
-
       .switch {
         width: fit-content;
         height: fit-content;
@@ -85,8 +75,7 @@
         perspective: 300px;
         position: relative;
       }
-
-      .mode {
+      .mode { 
         width: 100px;
         height: 60px;
         background: linear-gradient(rgb(72, 160, 219), rgb(40, 235, 225));
@@ -95,19 +84,16 @@
         justify-content: center;
         transition: 0.25s transform;
       }
-
       .mode:nth-child(1) {
         border-radius: 2mm 0 0 2mm;
         transform-origin: right;
       }
-
       .mode:nth-child(2) {
         border-radius: 0 2mm 2mm 0;
         transform-origin: left;
       }
-
       .text {
-        font-family: 'Epilogue';
+        font-family: poppins;
         font-size: 27px;
         font-weight: 800;
         color: transparent;
@@ -115,32 +101,26 @@
         background-clip: text;
         text-shadow: 1px 1px 2px rgba(255, 255, 255, 0.3);
       }
-
       #toggle:not(:checked) ~ .switch .mode:nth-child(1) {
         transform: rotateY(50deg);
-        background: rgb(238, 237, 239);
+        background: rgb(238, 237, 239);                                                                                                                                                             
         box-shadow: -10px 5px 20px rgba(0, 0, 0, 0.2);
       }
-
       #toggle:checked ~ .switch .mode:nth-child(2) {
         transform: rotateY(-50deg);
         background: rgb(238, 237, 239);
         box-shadow: 10px 5px 20px rgba(0, 0, 0, 0.2);
       }
-
       #toggle:not(:checked) ~ .switch .mode:nth-child(1) .text {
         background-color: #10476e;
       }
-
       #toggle:checked ~ .switch .mode:nth-child(2) .text {
         background-color: #10476e;
       }
-
       .indicator {
         position: absolute;
         height: 52px;
         width: 0;
-        font-family: Epilo;
         background: linear-gradient(
           to right,
           rgb(153, 152, 153),
@@ -150,33 +130,55 @@
         z-index: -1;
         transition: 0.25s;
       }
-
       .indicator.left {
         left: 5px;
         transform: translate(0, -50%) rotateY(-65deg);
         transform-origin: left;
       }
-
       .indicator.right {
         right: 5px;
         transform: translate(0, -50%) rotateY(65deg);
         transform-origin: right;
       }
-
       #toggle:not(:checked) ~ .switch .indicator.left {
         width: 95px;
       }
-
       #toggle:checked ~ .switch .indicator.right {
         width: 95px;
       }
+      .nav-container {
+      display: flex;
+      justify-content: flex-end;
+      gap: .5rem;
+      margin-top: -70px;
+      margin-right: 30px;
+    }
+    .nav-btn {
+      background-color: white;
+      color: #5fd4ad;
+      border: none;
+      padding: 0.5rem 1rem;
+      font-weight: bold;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background-color 0.2s;
+    }
+    .nav-btn:hover {
+      background-color: #e6f4ea;
+    }
 
-      #toggle {
-        display: none;
-      }
-  .container {
+    .logout {
+      background-color: #05847d;
+      color: white;
+    }
+
+    .logout:hover {
+      background: color #222;
+    }
+    .container {
     position: relative;
-    margin-top: 100px;
+    margin-top: 70px;
+    margin-left: 270px;
     width: 900px;
     height: 550px;
     padding: 5px;
@@ -680,9 +682,7 @@
     .right .today-date {
       padding: 10px;
     }
-  }
-  
-  .credits {
+.credits {
     position: absolute;
     bottom: 0;
     left: 0;
@@ -701,29 +701,33 @@
   .credits a:hover {
     text-decoration: underline;
   }
+}
     </style>
   </head>
-  <body>
-    <header>
-      <div class="toggle-container">
-        <input type="checkbox" name="toggle" id="toggle" />
-        <label for="toggle" class="switch">
-          <div class="mode">
-            <div class="text">ctrl</div>
-          </div>
-          <div class="mode">
-            <div class="text">save</div>
-          </div>
-          <div class="indicator left"></div>
-          <div class="indicator right"></div>
-        </label>
+
+<header>
+   <div class="center">
+    <input type="checkbox" name="toggle" id="toggle" />
+    <label for="toggle" class="switch">
+      <div class="mode">
+        <div class="text">ctrl</div>
       </div>
-      <h1><a href="/homepage">Home</a></h1>
-      <h1><a href="/Wallet">Wallet</a></h1>
-      <h1><a href="/Stats">Stats</a></h1>
-      <h1><a href="/Summary">Summary</a></h1>
-      <h1><a href="/Logout">Logout</a></h1>
-    </header>
+      <div class="mode">
+        <div class="text">save</div>
+      </div>
+      <div class="indicator left"></div>
+      <div class="indicator right"></div>
+    </label>
+  </div>
+  </header>
+
+    <div class="nav-container">
+      <button onclick="goHome()" class="nav-btn">Home</button>
+      <button onclick="goStats()" class="nav-btn">Stats</button>
+      <button onclick="goCalendar()" class="nav-btn">Calendar</button>
+      <button onclick="goWallet()" class="nav-btn">Wallet</button>
+      <button onclick="logOut()" class="nav-btn logout">Logout</button>
+    </div>
 
     <div class="container">
       <div class="left">
@@ -792,7 +796,23 @@
       </button>
     </div>
 
+    
     <script>
+       function goHome() {
+    window.location.href = "/homepage";
+  }
+  function goStats() {
+    window.location.href = "/stats";
+  }
+   function goCalendar() {
+    window.location.href = "/calendar";
+  }
+  function goWallet() {
+    window.location.href = "/wallet";
+  }
+  function logOut() {
+    window.location.href = "/logout";
+  }
       const calendar = document.querySelector(".calendar"),
   date = document.querySelector(".date"),
   daysContainer = document.querySelector(".days"),
@@ -1014,7 +1034,7 @@ function gotoDate() {
   console.log("here");
   const dateArr = dateInput.value.split("/");
   if (dateArr.length === 2) {
-    if (dateArr[0] > 0 && dateArr[0] < 13 && dateArr[1].length === 4) {
+    if (dateArr[0] > 0 && dateArr[0] <script && dateArr[1].length === 4) {
       month = dateArr[0] - 1;
       year = dateArr[1];
       initCalendar();
