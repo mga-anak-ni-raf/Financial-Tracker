@@ -519,14 +519,30 @@ footer {
         </label>
           </div>
   </header>
-    <div class="toggle-container"></div>
-    <div class="nav-buttons">z
-        <a href="/homepage">Home</a>
-        <a href="/calendar">Calendar</a>
-        <a href="/stats">Stats</a>
-        <a href="/wallet">Wallet</a>
-        <a href="/logout" class="logout-button">Logout</a>
+    <div class="nav-container">
+      <button onclick="goHome()" class="nav-btn">Home</button>
+      <button onclick="goStats()" class="nav-btn">Stats</button>
+      <button onclick="goCalendar()" class="nav-btn">Calendar</button>
+      <button onclick="goWallet()" class="nav-btn">Wallet</button>
+      <button onclick="logOut()" class="nav-btn logout">Logout</button>
     </div>
+    <script>
+      function goHome() {
+    window.location.href = "/homepage";
+  }
+  function goStats() {
+    window.location.href = "/stats";
+  }
+   function goCalendar() {
+    window.location.href = "/calendar";
+  }
+  function goWallet() {
+    window.location.href = "/wallet";
+  }
+  function logOut() {
+    window.location.href = "/logout";
+  }
+    </script>
   </header>
 
 <div class="text-container">
