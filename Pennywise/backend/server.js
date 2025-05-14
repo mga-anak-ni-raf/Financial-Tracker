@@ -268,32 +268,6 @@ app.route("/api/transaction")
   });
 
 
-// **Savings Route**
-app.post("/api/savings", (req, res) => {
-  const { goalAmount, contribution } = req.body;
-  const username = req.session.username;
-
-  if (!username || !goalAmount || !contribution) {
-    return res.status(400).json({ message: "Missing savings data." });
-  }
-
-  const query = `
-    INSERT INTO savings (username, goal_amount, contribution)
-    VALUES ($1, $2, $3)
-    ON CONFLICT (username)
-    DO UPDATE SET goal_amount = $2, contribution = $3
-  `;
-
-  db.query(query, [username, goalAmount, contribution])
-    .then(() => {
-      res.json({ success: true, message: "Savings data updated." });
-    })
-    .catch((err) => {
-      console.error("Error saving savings data:", err);
-      res.status(500).json({ message: "Error saving savings data." });
-    });
-});
-
   // **Debt Route**
   app.post("/api/debt", async (req, res) => {
     const { name, amount, interest, dueDate } = req.body;
@@ -350,6 +324,96 @@ app.post("/api/savings", (req, res) => {
       });
   });
 
+//SAVINGS route
+
+// GET: Fetch user's savings
+app.get("/api/savings", async (req, res) => {
+  const userId = req.session.userId;
+  
+  if (!userId) {
+    return res.status(401).json({ message: "Unauthorized" });
+  }
+
+  try {
+    const result = await db.query(
+      "SELECT goal_amount, saved_amount, last_contribution FROM savings WHERE user_id = $1",
+      [userId]
+    );
+    
+    if (result.rows.length > 0) {
+      res.json({ 
+        success: true, 
+        savings: {
+          goal: result.rows[0].goal_amount,
+          saved: result.rows[0].saved_amount,
+          contribution: result.rows[0].last_contribution
+        }
+      });
+    } else {
+      res.json({ 
+        success: true, 
+        savings: { 
+          goal: 0, 
+          saved: 0,
+          contribution: 0 
+        } 
+      });
+    }
+  } catch (err) {
+    console.error('Error fetching savings:', err);
+    res.status(500).json({ success: false, message: "Error fetching savings." });
+  }
+});
+
+// POST: Save or update user's savings
+app.post("/api/savings", async (req, res) => {
+  const userId = req.session.userId;
+  const { goalAmount, contribution } = req.body;
+
+  if (!userId) {
+    return res.status(401).json({ message: "Unauthorized" });
+  }
+
+  if (!goalAmount || !contribution) {
+    return res.status(400).json({ message: "Missing savings data." });
+  }
+
+  try {
+    // Check if savings record exists for this user
+    const existing = await db.query(
+      "SELECT * FROM savings WHERE user_id = $1",
+      [userId]
+    );
+
+    const now = new Date();
+
+    if (existing.rows.length > 0) {
+      // Update existing record
+      await db.query(
+        `UPDATE savings 
+         SET goal_amount = $1, 
+             saved_amount = saved_amount + $2,
+             last_contribution = $2,
+             updated_at = $3
+         WHERE user_id = $4`,
+        [goalAmount, contribution, now, userId]
+      );
+    } else {
+      // Insert new record
+      await db.query(
+        `INSERT INTO savings 
+         (user_id, goal_amount, saved_amount, last_contribution, updated_at)
+         VALUES ($1, $2, $3, $4, $5)`,
+        [userId, goalAmount, contribution, contribution, now]
+      );
+    }
+
+    res.json({ success: true, message: "Savings updated successfully." });
+  } catch (err) {
+    console.error('Error saving savings data:', err);
+    res.status(500).json({ success: false, message: "Error saving savings data." });
+  }
+});
 
   
 //STATS route
@@ -365,7 +429,7 @@ app.get("/api/stats", async (req, res) => {
     const [budgetRes, transactionRes, savingsRes, debtRes] = await Promise.all([
       db.query("SELECT monthly_budget FROM budgets WHERE user_id = $1", [userId]),
       db.query("SELECT SUM(cost) AS total_spent FROM transactions WHERE user_id = $1", [userId]),
-      db.query("SELECT goal_amount, contribution FROM savings WHERE user_id = $1", [userId]),
+      db.query("SELECT goal_amount, last_contribution FROM savings WHERE user_id = $1", [userId]),
       db.query("SELECT SUM(amount) AS total_debt FROM debts WHERE user_id = $1", [userId]),
     ]);
 
@@ -375,7 +439,7 @@ app.get("/api/stats", async (req, res) => {
         monthlyBudget: budgetRes.rows[0]?.monthly_budget || 0,
         totalSpent: transactionRes.rows[0]?.total_spent || 0,
         savingsGoal: savingsRes.rows[0]?.goal_amount || 0,
-        savingsContribution: savingsRes.rows[0]?.contribution || 0,
+        savingsContribution: savingsRes.rows[0]?.last_contribution || 0,
         totalDebt: debtRes.rows[0]?.total_debt || 0,
       }
     });

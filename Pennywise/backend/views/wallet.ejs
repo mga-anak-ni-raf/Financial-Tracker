@@ -517,8 +517,10 @@
 window.addEventListener('DOMContentLoaded', () => {
   loadBudget();
   loadTransactions();
-  loadDebts(); // 👈 ADD THIS
+  loadDebts();
+  loadSavings(); // 👈 Include this
 });
+
 
   function loadBudget() {
     fetch('/api/budget')
@@ -547,87 +549,156 @@ window.addEventListener('DOMContentLoaded', () => {
           </div>`;
       }
 
-      function addDebt() {
-  const name = document.getElementById("debtName").value;
-  const amount = parseFloat(document.getElementById("debtAmount").value);
-  const interest = parseFloat(document.getElementById("debtInterest").value);
-  const dueDate = document.getElementById("debtDueDate").value;
+        function addDebt() {
+    const name = document.getElementById("debtName").value;
+    const amount = parseFloat(document.getElementById("debtAmount").value);
+    const interest = parseFloat(document.getElementById("debtInterest").value);
+    const dueDate = document.getElementById("debtDueDate").value;
 
-  if (!name || isNaN(amount) || isNaN(interest) || !dueDate) {
-    alert("Please fill in all debt fields with valid values.");
+    if (!name || isNaN(amount) || amount <= 0 || isNaN(interest) || interest < 0 || !dueDate) {
+      alert("Please fill in all debt fields with valid values.");
+      return;
+    }
+
+    const debt = { name, amount, interest, dueDate };
+
+    fetch('/api/debt', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(debt),
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        console.log('Debt added:', data);
+        debts.push(debt);
+        displayDebts();
+
+        // Clear input fields
+        document.getElementById("debtName").value = "";
+        document.getElementById("debtAmount").value = "";
+        document.getElementById("debtInterest").value = "";
+        document.getElementById("debtDueDate").value = "";
+      })
+      .catch((err) => console.error('Error:', err));
+  }
+
+  function loadDebts() {
+    fetch('/api/debt')
+      .then(res => res.json())
+      .then(data => {
+        if (data.success && Array.isArray(data.debts)) {
+          debts = data.debts.map(d => ({
+            name: d.name,
+            amount: d.amount,
+            interest: d.interest,
+            dueDate: new Date(d.due_date).toLocaleDateString(),
+          }));
+          displayDebts();
+        } else {
+          console.error("Invalid debt data received.");
+        }
+      })
+      .catch(err => {
+        console.error("Error loading debts:", err);
+      });
+  }
+
+  function displayDebts() {
+    const debtListDiv = document.getElementById("debtList");
+    debtListDiv.innerHTML = "";
+
+    if (debts.length === 0) {
+      debtListDiv.innerHTML = "<p>No debts recorded yet.</p>";
+      return;
+    }
+
+    debts.forEach(debt => {
+      const item = document.createElement("div");
+      item.classList.add("debt-item");
+      item.innerHTML = `
+        <div>
+          <p><strong>${debt.name}</strong> - ${formatCurrency(debt.amount)}</p>
+          <p>Interest: ${debt.interest}%</p>
+          <p>Due Date: ${debt.dueDate}</p>
+        </div>
+      `;
+      debtListDiv.appendChild(item);
+    });
+  }
+
+  // CLIENT SIDE: Update the savings functions in your wallet.js
+
+// Update these functions in your wallet.ejs template
+
+function addSavings() {
+  const goalAmount = parseFloat(document.getElementById("savingsGoalAmount").value);
+  const contribution = parseFloat(document.getElementById("savingsContribution").value);
+
+  if (isNaN(goalAmount) || isNaN(contribution) || goalAmount <= 0 || contribution <= 0) {
+    alert("Please enter valid goal and contribution amounts.");
     return;
   }
 
-  const debt = { name, amount, interest, dueDate };
-
-  fetch('/api/debt', {
+  // Send to server with consistent parameter names
+  fetch('/api/savings', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(debt),
+    body: JSON.stringify({ goalAmount, contribution })
   })
-    .then((res) => res.json())
-    .then((data) => {
-      console.log('Debt added:', data);
-      debts.push({
-        name,
-        amount,
-        interest,
-        dueDate: new Date(dueDate).toLocaleDateString()
-      });
-      displayDebts();
-
-      // Clear inputs
-      document.getElementById("debtName").value = "";
-      document.getElementById("debtAmount").value = "";
-      document.getElementById("debtInterest").value = "";
-      document.getElementById("debtDueDate").value = "";
-    })
-    .catch((err) => console.error('Error:', err));
-}
-
-      function loadDebts() {
-  fetch('/api/debt')
     .then(res => res.json())
     .then(data => {
-      console.log("Fetched debts:", data);
-      if (data.success && Array.isArray(data.debts)) {
-        debts = data.debts.map(debt => ({
-          name: debt.name,
-          amount: debt.amount,
-          interest: debt.interest,
-          dueDate: new Date(debt.due_date).toLocaleDateString()
-        }));
-        displayDebts();
+      if (data.success) {
+        console.log("Savings added successfully");
+        
+        // Update local values
+        savingsGoal = goalAmount;
+        savingsSaved += contribution;
+        
+        updateSavingsDisplay();
+        
+        // Clear input fields
+        document.getElementById("savingsGoalAmount").value = "";
+        document.getElementById("savingsContribution").value = "";
       } else {
-        console.error("Invalid response format or no debts.");
+        alert("Error: " + (data.message || "Failed to save"));
       }
     })
     .catch(err => {
-      console.error("Error loading debts:", err);
+      console.error("Error saving savings:", err);
+      alert("An error occurred while saving");
     });
 }
 
-function displayDebts() {
-  const debtListDiv = document.getElementById("debtList");
-  debtListDiv.innerHTML = "";
-
-  if (debts.length === 0) {
-    debtListDiv.innerHTML = "<p>No debts recorded yet.</p>";
-    return;
-  }
-
-  debts.forEach((debt) => {
-    const item = document.createElement("div");
-    item.classList.add("debt-item");
-    item.innerHTML = `
-      <div>
-        <p><strong>${debt.name}</strong> - ${formatCurrency(debt.amount)}</p>
-        <p>Interest Rate: ${debt.interest}%</p>
-        <p>Due Date: ${debt.dueDate ? debt.dueDate : 'N/A'}</p>
-      </div>`;
-    debtListDiv.appendChild(item);
-  });
+function loadSavings() {
+  fetch('/api/savings')
+    .then(res => res.json())
+    .then(data => {
+      if (data.success && data.savings) {
+        console.log("Loaded savings:", data.savings);
+        
+        // Match the property names from the updated server response
+        savingsGoal = data.savings.goal || 0;
+        savingsSaved = data.savings.saved || 0;
+        
+        updateSavingsDisplay();
+      } else {
+        console.error("Invalid savings response");
+      }
+    })
+    .catch(err => {
+      console.error("Error loading savings:", err);
+    });
 }
+
+function updateSavingsDisplay() {
+  document.getElementById("savingsGoalDisplay").textContent = savingsGoal.toFixed(2);
+  document.getElementById("savingsSaved").textContent = savingsSaved.toFixed(2);
+
+  const progress = savingsGoal > 0 ? (savingsSaved / savingsGoal) * 100 : 0;
+  document.getElementById("progressBar").style.width = `${Math.min(progress, 100)}%`;
+}
+
+
     </script>
   </body>
 </html>
