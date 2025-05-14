@@ -495,26 +495,42 @@ footer {
     }
   });
 
-  let pieChart = new Chart(pieCtx, {
-    type: "pie",
-    data: {
-      labels: ["Savings", "Other Expenses", "Investments", "Emergency Fund"],
-      datasets: [{
-        label: "Savings Allocation",
-        data: [],
-        backgroundColor: ["#FFEB3B", "#FF5733", "#4CAF50", "#00BCD4"]
-      }]
-    },
-    options: {
-      responsive: true,
-      plugins: {
-        title: {
-          display: true,
-          text: "Financial Savings Distribution - Pie Chart"
+ // Updated pie chart configuration
+let pieChart = new Chart(pieCtx, {
+  type: "pie",
+  data: {
+    labels: ["Transactions", "Savings", "Debts", "Remaining Budget"],
+    datasets: [{
+      data: [10, 10, 10, 10], // Default data that will be replaced with real data
+      backgroundColor: ["#FF5733", "#4CAF50", "#E91E63", "#3498DB"]
+    }]
+  },
+  options: {
+    responsive: true,
+    maintainAspectRatio: true,
+    plugins: {
+      legend: {
+        display: true,
+        position: 'top',
+      },
+      title: {
+        display: true,
+        text: "Budget Allocation - Pie Chart"
+      },
+      tooltip: {
+        callbacks: {
+          label: function(context) {
+            let value = context.raw || 0;
+            let total = context.dataset.data.reduce((sum, val) => sum + (val || 0), 0);
+            let percentage = total > 0 ? Math.round((value / total) * 100) : 0;
+            return `${context.label}: $${value.toFixed(2)} (${percentage}%)`;
+          }
         }
       }
     }
-  });
+  }
+});
+
 
   // Function to handle view changes
   function changeView(view) {
@@ -679,51 +695,84 @@ footer {
     }
   }
 
-  // Function to fetch general stats
-  async function fetchStats() {
-    try {
-      const res = await fetch('/api/stats');
-      const result = await res.json();
+ // Updated fetchStats function with proper pie chart logic
+async function fetchStats() {
+  try {
+    const res = await fetch('/api/stats');
+    const result = await res.json();
 
-      if (result.success) {
-        const stats = result.data;
+    if (result.success) {
+      const stats = result.data;
+      
+      // Make sure all values are numbers for the pie chart
+      const totalSpent = Number(stats.totalSpent) || 0;
+      const savingsContribution = Number(stats.savingsContribution) || 0;
+      const totalDebt = Number(stats.totalDebt) || 0;
+      const monthlyBudget = Number(stats.monthlyBudget) || 0;
+      
+      // Calculate the remaining budget (ensure it's not negative)
+      const remainingBudget = Math.max(0, monthlyBudget - totalSpent - savingsContribution - totalDebt);
+      
+      console.log("Monthly Budget Breakdown:", {
+        monthlyBudget,
+        totalSpent,
+        savingsContribution,
+        totalDebt,
+        remainingBudget
+      });
+      
+      // Update pie chart with budget allocation - current month only
+      pieChart.data.datasets[0].data = [
+        totalSpent,          // Transactions this month
+        savingsContribution, // Savings this month
+        totalDebt,           // Debts this month
+        remainingBudget      // Remaining Budget for this month
+      ];
+      
+      // Update pie chart title and total text
+      pieChart.options.plugins.title.text = "Current Month Budget Allocation";
+      document.getElementById("pieTotalText").innerText = 
+        `Monthly Budget: $${monthlyBudget.toFixed(2)} | Remaining: $${remainingBudget.toFixed(2)}`;
+      
+      pieChart.update();
 
-        // Update charts with real data
-        barChart.data.datasets[0].data = [
-          stats.monthlyBudget - stats.totalSpent, // balance estimate
-          stats.totalSpent,
-          stats.savingsContribution,
-          stats.totalDebt,
-          stats.monthlyBudget,
-          stats.savingsGoal
-        ];
-        barChart.update();
-
-        lineChart.data.datasets[0].data = [
-          stats.totalSpent, stats.totalSpent * 0.9, stats.totalSpent * 1.1,
-          stats.totalSpent * 0.8, stats.totalSpent * 1.2, stats.totalSpent
-        ];
-        lineChart.update();
-
-        pieChart.data.datasets[0].data = [
-          stats.savingsContribution,
-          stats.totalSpent - stats.savingsContribution,
-          stats.savingsGoal - stats.savingsContribution,
-          stats.totalDebt
-        ];
-        pieChart.update();
-
-        // Update text labels
-        document.getElementById("barTotalText").innerText = `Balance Estimate: $${(stats.monthlyBudget - stats.totalSpent).toFixed(2)}`;
-        document.getElementById("lineTotalText").innerText = `Total Spent: $${stats.totalSpent.toFixed(2)}`;
-        document.getElementById("pieTotalText").innerText = `Total Savings: $${stats.savingsContribution.toFixed(2)}`;
-      } else {
-        console.error("Failed to load stats.");
-      }
-    } catch (error) {
-      console.error("Error fetching stats:", error);
+      // Update other charts (bar and line) with appropriate data
+      updateOtherCharts(stats);
+    } else {
+      console.error("Failed to load stats:", result.message);
     }
+  } catch (error) {
+    console.error("Error fetching stats:", error);
   }
+}
+
+// Function to update the other charts
+function updateOtherCharts(stats) {
+  // Update bar chart data
+  barChart.data.datasets[0].data = [
+    stats.monthlyBudget - stats.totalSpent, // balance estimate
+    stats.totalSpent,
+    stats.savingsContribution,
+    stats.totalDebt,
+    stats.monthlyBudget
+  ];
+  barChart.update();
+
+  // Update bar chart text
+  document.getElementById("barTotalText").innerText = 
+    `Balance Estimate: $${(stats.monthlyBudget - stats.totalSpent).toFixed(2)}`;
+
+  // Update line chart data
+  lineChart.data.datasets[0].data = [
+    stats.totalSpent, stats.totalSpent * 0.9, stats.totalSpent * 1.1,
+    stats.totalSpent * 0.8, stats.totalSpent * 1.2, stats.totalSpent
+  ];
+  lineChart.update();
+
+  // Update line chart text
+  document.getElementById("lineTotalText").innerText = 
+    `Total Spent This Month: $${stats.totalSpent.toFixed(2)}`;
+}
 
   // Initialize on page load
   window.onload = function() {

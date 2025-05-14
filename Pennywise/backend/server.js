@@ -418,6 +418,7 @@ app.post("/api/savings", async (req, res) => {
   
 //STATS route
 // This route fetches the user's budget, total spent, savings goal, and total debt
+
 app.get("/api/stats", async (req, res) => {
   const userId = req.session.userId;
 
@@ -426,21 +427,41 @@ app.get("/api/stats", async (req, res) => {
   }
 
   try {
+    // Fetch all necessary data in parallel
     const [budgetRes, transactionRes, savingsRes, debtRes] = await Promise.all([
       db.query("SELECT monthly_budget FROM budgets WHERE user_id = $1", [userId]),
       db.query("SELECT SUM(cost) AS total_spent FROM transactions WHERE user_id = $1", [userId]),
-      db.query("SELECT goal_amount, last_contribution FROM savings WHERE user_id = $1", [userId]),
+      db.query("SELECT goal_amount, saved_amount, last_contribution FROM savings WHERE user_id = $1", [userId]),
       db.query("SELECT SUM(amount) AS total_debt FROM debts WHERE user_id = $1", [userId]),
     ]);
+
+    // Get the monthly budget or default to 0
+    const monthlyBudget = budgetRes.rows[0]?.monthly_budget || 0;
+    
+    // Get total spent or default to 0
+    const totalSpent = parseFloat(transactionRes.rows[0]?.total_spent || 0);
+    
+    // Get savings data or default to 0
+    const savingsGoal = parseFloat(savingsRes.rows[0]?.goal_amount || 0);
+    const savedAmount = parseFloat(savingsRes.rows[0]?.saved_amount || 0);
+    const savingsContribution = parseFloat(savingsRes.rows[0]?.last_contribution || 0);
+    
+    // Get total debt or default to 0
+    const totalDebt = parseFloat(debtRes.rows[0]?.total_debt || 0);
+    
+    // Calculate remaining budget
+    const remainingBudget = Math.max(0, monthlyBudget - totalSpent - savingsContribution - totalDebt);
 
     res.json({
       success: true,
       data: {
-        monthlyBudget: budgetRes.rows[0]?.monthly_budget || 0,
-        totalSpent: transactionRes.rows[0]?.total_spent || 0,
-        savingsGoal: savingsRes.rows[0]?.goal_amount || 0,
-        savingsContribution: savingsRes.rows[0]?.last_contribution || 0,
-        totalDebt: debtRes.rows[0]?.total_debt || 0,
+        monthlyBudget,
+        totalSpent,
+        savingsGoal,
+        savedAmount,
+        savingsContribution,
+        totalDebt,
+        remainingBudget
       }
     });
   } catch (error) {
@@ -448,7 +469,6 @@ app.get("/api/stats", async (req, res) => {
     res.status(500).json({ message: "Error fetching stats." });
   }
 });
-
 // 🆕 Monthly Expenses Data for Chart
 app.get("/api/stats/expenses", async (req, res) => {
   const userId = req.session.userId;
