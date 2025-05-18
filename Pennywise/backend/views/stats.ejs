@@ -495,14 +495,21 @@ footer {
     }
   });
 
- // Updated pie chart configuration
+ // Create a functioning pie chart configuration
 let pieChart = new Chart(pieCtx, {
   type: "pie",
   data: {
     labels: ["Transactions", "Savings", "Debts", "Remaining Budget"],
     datasets: [{
-      data: [10, 10, 10, 10], // Default data that will be replaced with real data
-      backgroundColor: ["#FF5733", "#4CAF50", "#E91E63", "#3498DB"]
+      data: [1, 1, 1, 5], // Default placeholder values until real data loads
+      backgroundColor: [
+        "#FF5733", // Transactions - Orange-red
+        "#4CAF50", // Savings - Green
+        "#E91E63", // Debts - Pink
+        "#3498DB"  // Remaining Budget - Blue
+      ],
+      borderWidth: 1,
+      borderColor: '#fff'
     }]
   },
   options: {
@@ -512,10 +519,17 @@ let pieChart = new Chart(pieCtx, {
       legend: {
         display: true,
         position: 'top',
+        labels: {
+          padding: 10,
+          usePointStyle: true
+        }
       },
       title: {
         display: true,
-        text: "Budget Allocation - Pie Chart"
+        text: "Current Month Budget Allocation",
+        font: {
+          size: 16
+        }
       },
       tooltip: {
         callbacks: {
@@ -695,7 +709,7 @@ let pieChart = new Chart(pieCtx, {
     }
   }
 
- // Updated fetchStats function with proper pie chart logic
+// Updated fetchStats function with proper pie chart handling
 async function fetchStats() {
   try {
     const res = await fetch('/api/stats');
@@ -713,30 +727,35 @@ async function fetchStats() {
       // Calculate the remaining budget (ensure it's not negative)
       const remainingBudget = Math.max(0, monthlyBudget - totalSpent - savingsContribution - totalDebt);
       
-      console.log("Monthly Budget Breakdown:", {
-        monthlyBudget,
-        totalSpent,
-        savingsContribution,
-        totalDebt,
-        remainingBudget
+      console.log("Pie Chart Data:", {
+        transactions: totalSpent,
+        savings: savingsContribution,
+        debts: totalDebt,
+        remaining: remainingBudget
       });
       
-      // Update pie chart with budget allocation - current month only
-      pieChart.data.datasets[0].data = [
-        totalSpent,          // Transactions this month
-        savingsContribution, // Savings this month
-        totalDebt,           // Debts this month
-        remainingBudget      // Remaining Budget for this month
-      ];
+      // Make sure we have actual data to display
+      if (totalSpent > 0 || savingsContribution > 0 || totalDebt > 0 || remainingBudget > 0) {
+        // Update pie chart with budget allocation
+        pieChart.data.datasets[0].data = [
+          totalSpent,          // This month's transactions
+          savingsContribution, // This month's savings
+          totalDebt,           // This month's debts
+          remainingBudget      // Remaining budget
+        ];
+      } else {
+        // If no data, set some placeholder values for visual reference
+        pieChart.data.datasets[0].data = [1, 1, 1, 1];
+      }
       
       // Update pie chart title and total text
-      pieChart.options.plugins.title.text = "Current Month Budget Allocation";
       document.getElementById("pieTotalText").innerText = 
         `Monthly Budget: $${monthlyBudget.toFixed(2)} | Remaining: $${remainingBudget.toFixed(2)}`;
       
+      // Force chart update
       pieChart.update();
 
-      // Update other charts (bar and line) with appropriate data
+      // Update other charts
       updateOtherCharts(stats);
     } else {
       console.error("Failed to load stats:", result.message);
@@ -779,6 +798,70 @@ function updateOtherCharts(stats) {
     fetchStats();
     fetchTransactionData('monthly'); // Default to monthly view
   };
+
+  // Add this function to check the data from your API
+async function checkPieChartData() {
+  try {
+    // Show loading message
+    document.getElementById("pieTotalText").innerText = "Loading budget data...";
+    
+    // Make API request
+    const response = await fetch('/api/stats');
+    const data = await response.json();
+    
+    // Log the full response for debugging
+    console.log("API Response:", data);
+    
+    if (data.success && data.data) {
+      // Extract the values we need
+      const {
+        monthlyBudget = 0,
+        totalSpent = 0,
+        savingsContribution = 0,
+        totalDebt = 0,
+        remainingBudget = 0
+      } = data.data;
+      
+      // Log the extracted values
+      console.log("Pie Chart Values:", {
+        monthlyBudget,
+        totalSpent,
+        savingsContribution,
+        totalDebt,
+        remainingBudget
+      });
+      
+      // Show values on page for debugging
+      document.getElementById("pieTotalText").innerHTML = `
+        <div style="text-align: left; margin-top: 10px;">
+          <p>Monthly Budget: $${monthlyBudget.toFixed(2)}</p>
+          <p>Total Spent: $${totalSpent.toFixed(2)}</p>
+          <p>Savings: $${savingsContribution.toFixed(2)}</p>
+          <p>Debt: $${totalDebt.toFixed(2)}</p>
+          <p>Remaining: $${remainingBudget.toFixed(2)}</p>
+        </div>
+      `;
+      
+      return {
+        monthlyBudget,
+        totalSpent,
+        savingsContribution,
+        totalDebt,
+        remainingBudget
+      };
+    } else {
+      console.error("API returned error or missing data:", data);
+      document.getElementById("pieTotalText").innerText = "Error loading budget data";
+      return null;
+    }
+  } catch (error) {
+    console.error("Error checking pie chart data:", error);
+    document.getElementById("pieTotalText").innerText = "Error: " + error.message;
+    return null;
+  }
+}
+
+
 </script>
 </body>
 </html>
