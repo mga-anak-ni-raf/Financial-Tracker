@@ -1,0 +1,662 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Dashboard</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link href="https://fonts.googleapis.com/css2?family=Epilogue:wght@300;400;600;700&display=swap" rel="stylesheet" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <style>
+    * {
+      box-sizing: border-box;
+      font-family: 'Epilogue', sans-serif;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background: linear-gradient(#60d3e4, #5fd4ad);
+      background-attachment: fixed;
+      min-height: 100vh;
+      color: #333;
+    }
+
+    header {
+      background-color: #5fd4ad;
+      color: white;
+      padding: 20px 40px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .header-right a {
+      color: white;
+      text-decoration: none;
+      font-weight: bold;
+      margin-left: 15px;
+    }
+
+    .header-right a:hover {
+      text-decoration: underline;
+    }
+
+    .main-content {
+      padding: 2rem;
+    }
+
+    .content {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 2rem;
+      margin-bottom: 2rem;
+    }
+
+    .section {
+      flex: 1;
+      min-width: 300px;
+      max-width: 600px;
+      background-color: whitesmoke;
+      border-radius: 20px;
+      padding: 2rem;
+      box-shadow: 0 5px 20px rgba(255, 255, 255, 0.08);
+      transition: transform 0.3s ease;
+      color: #333;
+    }
+
+    .bar-box {
+      max-width: 700px;
+      width: 90%;
+      margin: 2rem auto;
+      padding: 2rem;
+      background-color: whitesmoke;
+      border-radius: 20px;
+      box-shadow: 0 5px 20px rgba(255, 255, 255, 0.08);
+      transition: transform 0.3s ease;
+    }
+
+    .chart-container {
+      width: 90%;
+      max-width: 700px;
+      margin: 2rem auto;
+      padding: 2rem;
+      background-color: whitesmoke;
+      border-radius: 20px;
+      box-shadow: 0 5px 20px rgba(255, 255, 255, 0.08);
+      transition: transform 0.3s ease;
+    }
+
+    canvas {
+      width: 100% !important;
+      height: 300px !important;
+      max-height: 300px !important;
+    }
+
+    h2 {
+      text-align: center;
+      color: #5fd4ad;
+      margin-bottom: 15px;
+    }
+
+    p {
+      font-size: 16px;
+      margin-bottom: 10px;
+      color: #333;
+    }
+
+    .totals {
+      margin-top: 12px;
+      font-weight: bold;
+      color: #5fd4ad;
+      font-size: 1.1rem;
+      text-align: center;
+      padding: 8px;
+      background-color: #f0f0f0;
+      border-radius: 8px;
+    }
+
+    .wallet-details {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.3s ease-out;
+    }
+
+    .wallet-details.show {
+      max-height: 500px;
+      transition: max-height 0.5s ease-in;
+    }
+
+    .toggle-button {
+      background-color: #5fd4ad;
+      color: white;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 20px;
+      cursor: pointer;
+      margin: 0 auto;
+      display: block;
+      font-weight: bold;
+      margin-top: 10px;
+    }
+
+    .toggle-button:hover {
+      background-color: #4bc396;
+    }
+
+    /* Enhanced List styles */
+    .list-container {
+      margin-top: 15px;
+      max-height: 300px;
+      overflow-y: auto;
+      padding: 5px;
+    }
+
+    .transaction-item, .debt-item {
+      background-color: #f9f9f9;
+      margin: 8px 0;
+      padding: 10px;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      transition: transform 0.2s ease;
+    }
+
+    .transaction-item:hover, .debt-item:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+    }
+
+    .transaction-item p, .debt-item p {
+      margin: 3px 0;
+    }
+
+    .transaction-item strong, .debt-item strong {
+      color: #5fd4ad;
+    }
+
+    .transaction-item small, .debt-item small {
+      color: #777;
+      font-size: 0.85rem;
+    }
+
+    @media (max-width: 768px) {
+      .content {
+        flex-direction: column;
+        align-items: center;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <header>
+    <h1>Ctrl.save</h1>
+    <div class="header-right">
+      <span>Welcome, <%- username %>!</span>
+      <a href="/calendar">Calendar</a>
+      <a href="/stats">Stats</a>
+      <a href="/wallet">Wallet</a>
+      <a href="/aboutus">About us</a>
+      <a href="/logout" class="logout-button">Logout</a>
+    </div>
+  </header>
+
+  <main class="main-content">
+    <!-- Top Row: Wallet + Pie Chart -->
+    <div class="content">
+      <div class="chart-container">
+        <h2>Wallet Overview</h2>
+        <p><strong>Remaining Budget:</strong> ₱<span id="wallet-remaining">0.00</span></p>
+        <div class="wallet-details">
+          <p><strong>Monthly Budget:</strong> ₱<span id="wallet-budget">0.00</span></p>
+          <p><strong>Savings:</strong> ₱<span id="wallet-savings">0.00</span></p>
+          <p><strong>Debt:</strong> ₱<span id="wallet-debt">0.00</span></p>
+        </div>
+        <button id="toggle-wallet" class="toggle-button">Show Details</button>
+      </div>
+
+      <div class="chart-container">
+        <h2>Budget Allocation</h2>
+        <canvas id="pieChart"></canvas>
+        <p id="stats-summary" class="totals"></p>
+      </div>
+    </div>
+
+    <!-- Bar Chart -->
+    <div class="bar-box">
+      <h2>Budget Breakdown</h2>
+      <canvas id="barChartHome"></canvas>
+      <p id="barHomeTotalText" class="totals"></p>
+    </div>
+    
+    <!-- Enhanced Sections: Transaction List and Debt List -->
+    <div class="content">
+      <div class="chart-container">
+        <h2>Transaction List</h2>
+        <div id="transaction-list" class="list-container">
+          <!-- Transaction items will be added dynamically -->
+          <p>Loading transactions...</p>
+        </div>
+        <p id="transaction-total" class="totals">Total Transactions: ₱0.00</p>
+      </div>
+      
+      <div class="chart-container">
+        <h2>Debt List</h2>
+        <div id="debt-list" class="list-container">
+          <!-- Debt items will be added dynamically -->
+          <p>Loading debts...</p>
+        </div>
+        <p id="debt-total" class="totals">Total Debt: ₱0.00</p>
+      </div>
+    </div>
+  </main>
+
+  <script>
+let pieChart, barChart;
+
+    // Toggle wallet details
+    document.getElementById('toggle-wallet').addEventListener('click', function() {
+      const details = document.querySelector('.wallet-details');
+      const button = document.getElementById('toggle-wallet');
+      
+      if (details.classList.contains('show')) {
+        details.classList.remove('show');
+        button.textContent = 'Show Details';
+      } else {
+        details.classList.add('show');
+        button.textContent = 'Hide Details';
+      }
+    });
+
+    async function loadDashboardData() {
+      console.log("Loading dashboard data...");
+      try {
+        // First try to fetch stats data
+        const res = await fetch('/api/stats');
+        const data = await res.json();
+
+        if (data.success && data.data) {
+          console.log("Stats data received:", data.data);
+          const stats = data.data;
+
+          // Wallet
+          document.getElementById('wallet-budget').textContent = stats.monthlyBudget.toFixed(2);
+          document.getElementById('wallet-savings').textContent = stats.savingsContribution.toFixed(2);
+          document.getElementById('wallet-debt').textContent = stats.totalDebt.toFixed(2);
+
+          const remaining = Math.max(0, stats.monthlyBudget - stats.totalSpent - stats.savingsContribution - stats.totalDebt);
+          document.getElementById('wallet-remaining').textContent = remaining.toFixed(2);
+
+          renderPieChart(stats.totalSpent, stats.savingsContribution, stats.totalDebt, remaining);
+          renderBarChart(stats);
+        } else {
+          console.error("Failed to load dashboard stats:", data);
+        }
+      } catch (error) {
+        console.error("Error loading dashboard stats:", error);
+      }
+      
+      // Load transaction and debt data separately to ensure they load even if stats fail
+      try {
+        await loadTransactions();
+      } catch (err) {
+        console.error("Failed to load transactions:", err);
+      }
+      
+      try {
+        await loadDebts();
+      } catch (err) {
+        console.error("Failed to load debts:", err);
+      }
+    }
+
+    function renderPieChart(transactions, savings, debts, remaining) {
+      const ctx = document.getElementById('pieChart').getContext('2d');
+      
+      if (pieChart) {
+        pieChart.destroy();
+      }
+      
+      pieChart = new Chart(ctx, {
+        type: 'pie',
+        data: {
+          labels: ['Transactions', 'Savings', 'Debts', 'Remaining'],
+          datasets: [{
+            data: [transactions, savings, debts, remaining],
+            backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56', '#4CAF50'],
+            borderWidth: 1,
+            borderColor: '#fff'
+          }]
+        },
+        options: {
+          responsive: true,
+          plugins: {
+            legend: {
+              position: 'top',
+              labels: {
+                usePointStyle: true
+              }
+            }
+          }
+        }
+      });
+
+      document.getElementById("stats-summary").innerText = `Remaining: ₱${remaining.toFixed(2)}`;
+    }
+
+    function renderBarChart(stats) {
+      const ctx = document.getElementById('barChartHome').getContext('2d');
+      
+      if (barChart) {
+        barChart.destroy();
+      }
+      
+      const remaining = Math.max(0, stats.monthlyBudget - stats.totalSpent - stats.savingsContribution - stats.totalDebt);
+      
+      barChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+          // Re-ordered as requested: Total Budget, Remaining, Spent, Savings, Debt
+          labels: ['Total Budget', 'Remaining', 'Spent', 'Savings', 'Debt'],
+          datasets: [{
+            label: 'Budget Breakdown (₱)',
+            data: [
+              stats.monthlyBudget,
+              remaining,
+              stats.totalSpent,
+              stats.savingsContribution,
+              stats.totalDebt
+            ],
+            backgroundColor: ['#8884d8', '#4CAF50', '#FF6384', '#36A2EB', '#E91E63']
+          }]
+        },
+        options: {
+          responsive: true,
+          plugins: {
+            tooltip: {
+              callbacks: {
+                label: function(context) {
+                  return `₱${context.raw.toFixed(2)}`;
+                }
+              }
+            },
+            legend: {
+              display: false
+            }
+          },
+          scales: {
+            y: {
+              beginAtZero: true,
+              title: {
+                display: true,
+                text: 'Amount (₱)'
+              }
+            }
+          }
+        }
+      });
+
+      document.getElementById("barHomeTotalText").innerText =
+        `Remaining: ₱${remaining.toFixed(2)}`;
+    }
+
+    // Enhanced transaction loading and display with additional error handling
+    async function loadTransactions() {
+      console.log("Loading transactions...");
+      document.getElementById('transaction-list').innerHTML = '<p>Loading transactions...</p>';
+      
+      // Create a sample transaction if needed for testing
+      const createSampleTransactions = function() {
+        return [
+          {
+            name: "Sample Transaction 1",
+            amount: 1500.00,
+            date: new Date(),
+            category: "Sample Category"
+          },
+          {
+            name: "Sample Transaction 2",
+            amount: 2500.00,
+            date: new Date(Date.now() - 86400000), // yesterday
+            category: "Another Category"
+          }
+        ];
+      };
+      
+      try {
+        const response = await fetch('/api/transaction');
+        
+        if (!response.ok) {
+          throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+        
+        const data = await response.json();
+        console.log("Transaction data received:", data);
+        
+        let transactions = [];
+        
+        if (data.success && Array.isArray(data.transactions)) {
+          // Format the transactions from API response
+          transactions = data.transactions.map(t => ({
+            name: t.name || 'Unnamed Transaction',
+            amount: parseFloat(t.cost) || 0,
+            date: t.date_time ? new Date(t.date_time) : new Date(),
+            category: t.description || 'Uncategorized'
+          }));
+        } else {
+          console.error("Invalid transaction data format:", data);
+          // Uncomment for testing with sample data
+          // transactions = createSampleTransactions();
+        }
+        
+        // Calculate total (protect against NaN)
+        const totalAmount = transactions.reduce((sum, transaction) => {
+          return sum + (isNaN(transaction.amount) ? 0 : transaction.amount);
+        }, 0);
+        
+        // Display transactions
+        renderTransactionList(transactions);
+        
+        // Update total
+        document.getElementById('transaction-total').textContent = 
+          `Total Transactions: ₱${totalAmount.toFixed(2)}`;
+      } catch (error) {
+        console.error("Error loading transactions:", error);
+        document.getElementById('transaction-list').innerHTML = 
+          `<p>Error loading transactions: ${error.message}</p>`;
+          
+        // Uncomment below to display sample data in case of errors
+        // renderTransactionList(createSampleTransactions());
+      }
+    }
+
+    // Enhanced debt loading and display with additional error handling
+    async function loadDebts() {
+      console.log("Loading debts...");
+      document.getElementById('debt-list').innerHTML = '<p>Loading debts...</p>';
+      
+      // Create a sample debt if needed for testing
+      const createSampleDebts = function() {
+        return [
+          {
+            name: "Sample Loan",
+            amount: 10000.00,
+            interest: 5.5,
+            dueDate: new Date(Date.now() + 30 * 86400000) // 30 days from now
+          },
+          {
+            name: "Sample Credit Card",
+            amount: 5000.00,
+            interest: 12.0,
+            dueDate: new Date(Date.now() + 15 * 86400000) // 15 days from now
+          }
+        ];
+      };
+      
+      try {
+        const response = await fetch('/api/debt');
+        
+        if (!response.ok) {
+          throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+        
+        const data = await response.json();
+        console.log("Debt data received:", data);
+        
+        let debts = [];
+        
+        if (data.success && Array.isArray(data.debts)) {
+          // Format the debts from API response
+          debts = data.debts.map(d => ({
+            name: d.name || 'Unnamed Debt',
+            amount: parseFloat(d.amount) || 0,
+            interest: parseFloat(d.interest) || 0,
+            dueDate: d.due_date ? new Date(d.due_date) : new Date()
+          }));
+        } else {
+          console.error("Invalid debt data format:", data);
+          // Uncomment for testing with sample data
+          // debts = createSampleDebts();
+        }
+        
+        // Calculate total (protect against NaN)
+        const totalDebt = debts.reduce((sum, debt) => {
+          return sum + (isNaN(debt.amount) ? 0 : debt.amount);
+        }, 0);
+        
+        // Display debts
+        renderDebtList(debts);
+        
+        // Update total
+        document.getElementById('debt-total').textContent = 
+          `Total Debt: ₱${totalDebt.toFixed(2)}`;
+      } catch (error) {
+        console.error("Error loading debts:", error);
+        document.getElementById('debt-list').innerHTML = 
+          `<p>Error loading debts: ${error.message}</p>`;
+          
+        // Uncomment below to display sample data in case of errors
+        // renderDebtList(createSampleDebts());
+      }
+    }
+
+    // Enhanced transaction display function with better error handling
+    function renderTransactionList(transactions) {
+      const container = document.getElementById('transaction-list');
+      container.innerHTML = '';
+      
+      console.log("Rendering transactions:", transactions);
+      
+      // If no transactions, show message
+      if (!transactions || transactions.length === 0) {
+        container.innerHTML = '<p>No transactions recorded yet.</p>';
+        return;
+      }
+      
+      try {
+        // Sort transactions by date (newest first)
+        transactions.sort((a, b) => {
+          const dateA = a.date instanceof Date ? a.date : new Date();
+          const dateB = b.date instanceof Date ? b.date : new Date();
+          return dateB - dateA;
+        });
+        
+        // Display up to 5 most recent transactions
+        const displayTransactions = transactions.slice(0, 5);
+        
+        displayTransactions.forEach(transaction => {
+          const item = document.createElement('div');
+          item.classList.add('transaction-item');
+          
+          // Safely format date
+          let dateStr = 'Unknown date';
+          try {
+            if (transaction.date instanceof Date && !isNaN(transaction.date)) {
+              dateStr = transaction.date.toLocaleDateString();
+            }
+          } catch (e) {
+            console.error("Error formatting date:", e);
+          }
+          
+          // Create a more detailed transaction display similar to wallet.ejs
+          item.innerHTML = `
+            <div>
+              <p><strong>${transaction.name || 'Unnamed'}</strong> - ₱${(parseFloat(transaction.amount) || 0).toFixed(2)}</p>
+              <p>${transaction.category || 'Uncategorized'}</p>
+              <p><small>Date: ${dateStr}</small></p>
+            </div>`;
+          
+          container.appendChild(item);
+        });
+      } catch (error) {
+        console.error("Error rendering transaction list:", error);
+        container.innerHTML = `<p>Error displaying transactions: ${error.message}</p>`;
+      }
+    }
+
+    // Enhanced debt display function with better error handling
+    function renderDebtList(debts) {
+      const container = document.getElementById('debt-list');
+      container.innerHTML = '';
+      
+      console.log("Rendering debts:", debts);
+      
+      // If no debts, show message
+      if (!debts || debts.length === 0) {
+        container.innerHTML = '<p>No debts recorded yet.</p>';
+        return;
+      }
+      
+      try {
+        // Sort debts by due date (nearest first)
+        debts.sort((a, b) => {
+          const dateA = a.dueDate instanceof Date ? a.dueDate : new Date();
+          const dateB = b.dueDate instanceof Date ? b.dueDate : new Date();
+          return dateA - dateB;
+        });
+        
+        debts.forEach(debt => {
+          const item = document.createElement('div');
+          item.classList.add('debt-item');
+          
+          // Safely format date
+          let dateStr = 'Unknown due date';
+          try {
+            if (debt.dueDate instanceof Date && !isNaN(debt.dueDate)) {
+              dateStr = debt.dueDate.toLocaleDateString();
+            }
+          } catch (e) {
+            console.error("Error formatting date:", e);
+          }
+          
+          // Create a more detailed debt display similar to wallet.ejs
+          item.innerHTML = `
+            <div>
+              <p><strong>${debt.name || 'Unnamed'}</strong> - ₱${(parseFloat(debt.amount) || 0).toFixed(2)}</p>
+              <p>Interest: ${(parseFloat(debt.interest) || 0).toFixed(1)}%</p>
+              <p><small>Due: ${dateStr}</small></p>
+            </div>`;
+          
+          container.appendChild(item);
+        });
+      } catch (error) {
+        console.error("Error rendering debt list:", error);
+        container.innerHTML = `<p>Error displaying debts: ${error.message}</p>`;
+      }
+    }
+
+    // Make sure we load the dashboard data when the page loads
+    document.addEventListener('DOMContentLoaded', function() {
+      console.log("DOM fully loaded, initializing dashboard...");      
+      loadDashboardData();
+    });
+    
+    // Also try the window.onload approach as a fallback
+    window.onload = function() {
+      console.log("Window loaded, initializing dashboard (if not already)...");
+      loadDashboardData();
+    };
+  </script>
+</body>
+</html>

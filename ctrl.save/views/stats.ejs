@@ -1,0 +1,748 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Stats</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <link
+      href="https://fonts.googleapis.com/css2?family=Epilogue:wght@300;400;600;700&display=swap"
+      rel="stylesheet"
+      />
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: 'Epilogue', sans-serif;
+      background: linear-gradient(to bottom,#60d3e4,#5fd4ad);
+      background-repeat: no-repeat;
+      background-attachment: fixed;
+      min-height: 100vh;
+    }
+
+    header {
+        background-color: #5fd4ad;
+        color: white;
+        padding: 10px;
+    }
+    .center {
+        width: 100%;
+        display: flex;
+        align-items: start;
+        justify-content: start;
+        margin: 10px 10px;
+    }
+      #toggle {
+        display: none;
+      }
+      .switch {
+        width: fit-content;
+        height: fit-content;
+        padding: 5px;
+        background: linear-gradient(rgb(211, 210, 212), rgb(245, 244, 246));
+        box-shadow: inset 0px 2px 2px 0px rgba(0, 0, 0, 0.2);
+        border-radius: 2mm;
+        display: flex;
+        perspective: 300px;
+        position: relative;
+      }
+      .mode { 
+        width: 100px;
+        height: 60px;
+        background: linear-gradient(rgb(72, 160, 219), rgb(40, 235, 225));
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: 0.25s transform;
+      }
+      .mode:nth-child(1) {
+        border-radius: 2mm 0 0 2mm;
+        transform-origin: right;
+      }
+      .mode:nth-child(2) {
+        border-radius: 0 2mm 2mm 0;
+        transform-origin: left;
+      }
+      .text {
+        font-family: poppins;
+        font-size: 27px;
+        font-weight: 800;
+        color: transparent;
+        background-color: #000000;
+        background-clip: text;
+        text-shadow: 1px 1px 2px rgba(255, 255, 255, 0.3);
+      }
+      #toggle:not(:checked) ~ .switch .mode:nth-child(1) {
+        transform: rotateY(50deg);
+        background: rgb(238, 237, 239);                                                                                                                                                             
+        box-shadow: -10px 5px 20px rgba(0, 0, 0, 0.2);
+      }
+      #toggle:checked ~ .switch .mode:nth-child(2) {
+        transform: rotateY(-50deg);
+        background: rgb(238, 237, 239);
+        box-shadow: 10px 5px 20px rgba(0, 0, 0, 0.2);
+      }
+      #toggle:not(:checked) ~ .switch .mode:nth-child(1) .text {
+        background-color: #10476e;
+      }
+      #toggle:checked ~ .switch .mode:nth-child(2) .text {
+        background-color: #10476e;
+      }
+      .indicator {
+        position: absolute;
+        height: 52px;
+        width: 0;
+        background: linear-gradient(
+          to right,
+          rgb(153, 152, 153),
+          #4ac395
+        );
+        top: 50%;
+        z-index: -1;
+        transition: 0.25s;
+      }
+      .indicator.left {
+        left: 5px;
+        transform: translate(0, -50%) rotateY(-65deg);
+        transform-origin: left;
+      }
+      .indicator.right {
+        right: 5px;
+        transform: translate(0, -50%) rotateY(65deg);
+        transform-origin: right;
+      }
+      #toggle:not(:checked) ~ .switch .indicator.left {
+        width: 95px;
+      }
+      #toggle:checked ~ .switch .indicator.right {
+        width: 95px;
+      }
+      .nav-container {
+      display: flex;
+      justify-content: flex-end;
+      gap: .5rem;
+      margin-top: -70px;
+      margin-right: 30px;
+    }
+    .nav-btn {
+      background-color: white;
+      color: #5fd4ad;
+      border: none;
+      padding: 0.5rem 1rem;
+      font-weight: bold;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background-color 0.2s;
+    }
+    .nav-btn:hover {
+      background-color: #e6f4ea;
+    }
+
+    .logout {
+      background-color: #05847d;
+      color: white;
+    }
+
+    .logout:hover {
+      background: color #222;
+    }
+    .page-container {
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh; /* full viewport height */
+    }
+
+    main {
+     flex: 1; /* takes up all remaining space */
+    }
+
+    footer {
+      background-color: #5fd4ad;
+      color: white;
+      text-align: center;
+      padding: 1rem 0;
+    }
+
+    .bar-box,
+    .line-box,
+    .pie-box {
+      transform: scale(1.02);
+    }
+    .bar-box {
+      max-width: 700px;  /* ↓ was 1000px, now smaller */
+      width: 90%;
+      margin: 2rem auto;
+      padding: 2rem;
+      background-color: whitesmoke;
+      border-radius: 20px;
+      box-shadow: 0 5px 20px rgba(255, 255, 255, 0.08);
+      transition: transform 0.3s ease;
+    }
+
+    .line-box {
+      max-width: 700px;  /* ↓ was 1000px, now smaller */
+      width: 90%;
+      margin: 2rem auto;
+      padding: 2rem;
+      background-color: whitesmoke;
+      border-radius: 20px;
+      box-shadow: 0 5px 20px rgba(189, 116, 116, 0.08);
+      transition: transform 0.3s ease;
+    } 
+
+    .pie-box {
+      max-width: 700px;  /* ↓ was 1000px, now smaller */
+      width: 90%;
+      margin: 2rem auto;
+      padding: 2rem;
+      background-color: whitesmoke;
+      border-radius: 20px;
+      box-shadow: 0 5px 20px rgba(0,0,0,0.08);
+      transition: transform 0.3s ease;
+    }
+    
+    canvas {
+      width: 100% !important;
+      height: 300px !important;
+      max-height: 300px !important;
+    }
+
+    .totals {
+      margin-top: 1rem;
+      font-weight: bold;
+      color: #5fd4ad;
+      font-size: 1.1rem;
+      text-align: center;
+    }
+
+    .notes-transactions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 2rem;
+      justify-content: center;
+      padding: 2rem;
+    }
+
+    .notes, .transactions {
+      background: white;
+      border-radius: 12px;
+      padding: 1rem;
+      box-shadow: 0 0 10px rgba(0,0,0,0.05);
+      flex: 1;
+      min-width: 300px;
+      max-width: 500px;
+    }
+
+    textarea {
+      width: 100%;
+      padding: 0.5rem;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      font-size: 1rem;
+      resize: none;
+      margin-bottom: 0.5rem;
+    }
+    .note {
+      background-color: #f5f5f5;
+      padding: 1rem;
+      margin: 0.5rem 0;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    .transaction-item {
+      background-color: #f5f5f5;
+      padding: 0.75rem;
+      margin: 0.5rem 0;
+      border-radius: 8px;
+      border-left: 4px solid #5fd4ad;
+    }
+    
+    .transaction-item h4 {
+      margin: 0 0 0.5rem 0;
+      display: flex;
+      justify-content: space-between;
+    }
+    
+    .transaction-item p {
+      margin: 0.25rem 0;
+      color: #555;
+      font-size: 0.9rem;
+    }
+
+    .transaction-amount {
+      font-weight: bold;
+      color: #5fd4ad;
+    }
+footer {
+  background-color: #5fd4ad;
+  color: rgb(0, 0, 0);
+  text-align: center;
+  padding: 20px;
+  font-size: 18px;
+  border-bottom-left-radius: 20px;
+  border-bottom-right-radius: 20px;
+}
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="center">
+    <input type="checkbox" name="toggle" id="toggle" />
+    <label for="toggle" class="switch">
+      <div class="mode">
+        <div class="text">ctrl</div>
+      </div>
+      <div class="mode">
+        <div class="text">save</div>
+      </div>
+      <div class="indicator left"></div>
+      <div class="indicator right"></div>
+    </label>
+  </div>
+  </header>
+
+    <div class="nav-container">
+      <button onclick="goHome()" class="nav-btn">Home</button>
+      <button onclick="goStats()" class="nav-btn">Stats</button>
+      <button onclick="goCalendar()" class="nav-btn">Calendar</button>
+      <button onclick="goWallet()" class="nav-btn">Wallet</button>
+      <button onclick="logOut()" class="nav-btn logout">Logout</button>
+    </div>
+
+<div class="bar-box">
+  <canvas id="barChart"></canvas>
+  <p id="barTotalText" class="totals"></p>
+</div>
+
+<div class="line-box">
+  <canvas id="lineChart"></canvas>
+  <p id="lineTotalText" class="totals"></p>
+</div>
+
+<div class="line-box">
+  <canvas id="expensesChart"></canvas>
+  <p id="expensesTotalText" class="totals"></p>
+</div>
+
+<div class="pie-box">
+  <canvas id="pieChart"></canvas>
+  <p id="pieTotalText" class="totals"></p>
+</div>
+
+<footer>
+  <p>&copy; 2025 Financial Dashboard. All rights reserved. <button onclick="goAboutus()" class="nav-btn">About Us</button> </p>
+</footer>
+
+<script>
+  function goHome() {
+    window.location.href = "/homepage";
+  }
+
+  function goCalendar() {
+    window.location.href = "/calendar";
+  }
+
+  function goWallet() {
+    window.location.href = "/wallet";
+  }
+
+  function logOut() {
+    window.location.href = "/logout";
+  }
+   function goAboutus() {
+    window.location.href = "/aboutus";
+  }
+
+  function goStats() {
+    window.location.href = "/stats";
+  }
+
+  // Default labels for monthly view
+  let labels = ["January", "February", "March", "April", "May", "June"];
+
+  const barCtx = document.getElementById("barChart").getContext("2d");
+  const lineCtx = document.getElementById("lineChart").getContext("2d");
+  const pieCtx = document.getElementById("pieChart").getContext("2d");
+  const expensesCtx = document.getElementById("expensesChart").getContext("2d");
+
+  let barChart = new Chart(barCtx, {
+    type: "bar",
+    data: {
+      labels: labels,
+      datasets: [{
+        label: "Balance",
+        data: [],
+        backgroundColor: "#5fd4ad"
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: true,
+      plugins: {
+        title: {
+          display: true,
+          text: "Monthly Balance - Bar Chart"
+        }
+      }
+    }
+  });
+
+  let lineChart = new Chart(lineCtx, {
+    type: "line",
+    data: {
+      labels: ["Week 1", "Week 2", "Week 3", "Week 4", "Week 5"],
+      datasets: [{
+        label: "Weekly Expenses",
+        data: [],
+        borderColor: "#FF5733",
+        backgroundColor: "rgba(255, 87, 51, 0.2)",
+        tension: 0.3,
+        fill: true
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        title: {
+          display: true,
+          text: "Weekly Expenses - Line Chart"
+        }
+      }
+    }
+  });
+
+  // Create the expenses chart
+  let expensesChart = new Chart(expensesCtx, {
+    type: "line",
+    data: {
+      labels: [],
+      datasets: [{
+        label: "Transaction Expenses",
+        data: [],
+        borderColor: "#4CAF50",
+        backgroundColor: "rgba(76, 175, 80, 0.2)",
+        tension: 0.3,
+        fill: true
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        title: {
+          display: true,
+          text: "Transactions Over Time"
+        }
+      },
+      scales: {
+        y: {
+          beginAtZero: true,
+          title: {
+            display: true,
+            text: 'Amount ($)'
+          }
+        },
+        x: {
+          title: {
+            display: true,
+            text: 'Date'
+          }
+        }
+      }
+    }
+  });
+
+ // Create a functioning pie chart configuration
+let pieChart = new Chart(pieCtx, {
+  type: "pie",
+  data: {
+    labels: ["Transactions", "Savings", "Debts", "Remaining Budget"],
+    datasets: [{
+      data: [1, 1, 1, 5], // Default placeholder values until real data loads
+      backgroundColor: [
+        "#FF5733", // Transactions - Orange-red
+        "#4CAF50", // Savings - Green
+        "#E91E63", // Debts - Pink
+        "#3498DB"  // Remaining Budget - Blue
+      ],
+      borderWidth: 1,
+      borderColor: '#fff'
+    }]
+  },
+  options: {
+    responsive: true,
+    maintainAspectRatio: true,
+    plugins: {
+      legend: {
+        display: true,
+        position: 'top',
+        labels: {
+          padding: 10,
+          usePointStyle: true
+        }
+      },
+      title: {
+        display: true,
+        text: "Current Month Budget Allocation",
+        font: {
+          size: 16
+        }
+      },
+      tooltip: {
+        callbacks: {
+          label: function(context) {
+            let value = context.raw || 0;
+            let total = context.dataset.data.reduce((sum, val) => sum + (val || 0), 0);
+            let percentage = total > 0 ? Math.round((value / total) * 100) : 0;
+            return `${context.label}: $${value.toFixed(2)} (${percentage}%)`;
+          }
+        }
+      }
+    }
+  }
+});
+
+  // Function to fetch transaction data
+  async function fetchTransactionData() {
+    try {
+      const response = await fetch('/api/transaction');
+      const data = await response.json();
+      
+      if (data.success && data.transactions && data.transactions.length > 0) {
+        // Process transactions for the expenses chart
+        displayTransactionsChart(data.transactions);
+        
+        // Process transactions for the weekly expenses chart
+        displayWeeklyExpenses(data.transactions);
+        
+        // Display recent transactions in the list
+        displayTransactionsList(data.transactions);
+      } else {
+        console.error("No transactions found or error in API response");
+      }
+    } catch (error) {
+      console.error("Error fetching transaction data:", error);
+    }
+  }
+
+  // Function to display transactions in the chart
+  function displayTransactionsChart(transactions) {
+    // Sort transactions by date
+    transactions.sort((a, b) => new Date(a.date_time) - new Date(b.date_time));
+    
+    // Format the data for monthly view by default
+    let formattedData = {};
+    let labels = [];
+    let data = [];
+    
+    transactions.forEach(transaction => {
+      const date = new Date(transaction.date_time);
+      // Format for monthly view
+      const key = `${date.toLocaleString('default', { month: 'short' })} ${date.getFullYear()}`;
+      
+      // Aggregate costs by the key
+      if (!formattedData[key]) {
+        formattedData[key] = 0;
+      }
+      formattedData[key] += parseFloat(transaction.cost);
+    });
+    
+    // Convert the aggregated data to arrays for Chart.js
+    for (const [key, value] of Object.entries(formattedData)) {
+      labels.push(key);
+      data.push(value);
+    }
+    
+    // Update the expenses chart
+    expensesChart.data.labels = labels;
+    expensesChart.data.datasets[0].data = data;
+    
+    // Set the chart title
+    expensesChart.options.plugins.title.text = 'Monthly Transaction Expenses';
+    
+    // Calculate the total expenses
+    const totalExpenses = data.reduce((sum, value) => sum + value, 0);
+    document.getElementById('expensesTotalText').innerText = `Total Expenses: $${totalExpenses.toFixed(2)}`;
+    
+    expensesChart.update();
+  }
+
+  // New function to display weekly expenses
+  function displayWeeklyExpenses(transactions) {
+    // Sort transactions by date
+    transactions.sort((a, b) => new Date(a.date_time) - new Date(b.date_time));
+    
+    // Get current date and start of the month
+    const now = new Date();
+    const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+    
+    // Filter transactions for current month only
+    const currentMonthTransactions = transactions.filter(transaction => {
+      const transactionDate = new Date(transaction.date_time);
+      return transactionDate >= startOfMonth && transactionDate <= now;
+    });
+    
+    // Group transactions by week of the month
+    const weeklyData = [0, 0, 0, 0, 0]; // Initialize with 5 weeks (0 values)
+    
+    currentMonthTransactions.forEach(transaction => {
+      const transactionDate = new Date(transaction.date_time);
+      // Get week number (0-indexed)
+      const weekOfMonth = Math.floor((transactionDate.getDate() - 1) / 7);
+      
+      // Add to appropriate week's total (clamp to 0-4 index)
+      const weekIndex = Math.min(weekOfMonth, 4);
+      weeklyData[weekIndex] += parseFloat(transaction.cost);
+    });
+    
+    // Update the weekly expenses line chart
+    lineChart.data.datasets[0].data = weeklyData;
+    
+    // Calculate the total weekly expenses
+    const totalWeeklyExpenses = weeklyData.reduce((sum, value) => sum + value, 0);
+    document.getElementById('lineTotalText').innerText = `Total Weekly Expenses: $${totalWeeklyExpenses.toFixed(2)}`;
+    
+    lineChart.update();
+  }
+
+  // Function to display transactions in the list
+  function displayTransactionsList(transactions) {
+    const container = document.getElementById('transactionsContainer');
+    container.innerHTML = ''; // Clear existing content
+    
+    // Sort transactions by date (newest first)
+    transactions.sort((a, b) => new Date(b.date_time) - new Date(a.date_time));
+    
+    // Take only the 5 most recent transactions
+    const recentTransactions = transactions.slice(0, 5);
+    
+    if (recentTransactions.length === 0) {
+      container.innerHTML = '<p>No transactions found.</p>';
+      return;
+    }
+    
+    recentTransactions.forEach(transaction => {
+      const date = new Date(transaction.date_time);
+      const formattedDate = date.toLocaleDateString('en-US', { 
+        year: 'numeric', 
+        month: 'short', 
+        day: 'numeric' 
+      });
+      
+      const transactionElement = document.createElement('div');
+      transactionElement.className = 'transaction-item';
+      transactionElement.innerHTML = `
+        <h4>
+          ${transaction.name} 
+          <span class="transaction-amount">$${parseFloat(transaction.cost).toFixed(2)}</span>
+        </h4>
+        <p>${transaction.description}</p>
+        <p><small>${formattedDate}</small></p>
+      `;
+      
+      container.appendChild(transactionElement);
+    });
+  }
+
+  // Function to add a note (placeholder function)
+  function addNote() {
+    const noteInput = document.getElementById('noteInput');
+    const noteText = noteInput.value.trim();
+    
+    if (noteText) {
+      const notesContainer = document.getElementById('notesContainer');
+      const noteElement = document.createElement('div');
+      noteElement.className = 'note';
+      noteElement.textContent = noteText;
+      
+      notesContainer.prepend(noteElement);
+      noteInput.value = '';
+    }
+  }
+
+// Updated fetchStats function with proper pie chart handling
+async function fetchStats() {
+  try {
+    const res = await fetch('/api/stats');
+    const result = await res.json();
+
+    if (result.success) {
+      const stats = result.data;
+      
+      // Make sure all values are numbers for the pie chart
+      const totalSpent = Number(stats.totalSpent) || 0;
+      const savingsContribution = Number(stats.savingsContribution) || 0;
+      const totalDebt = Number(stats.totalDebt) || 0;
+      const monthlyBudget = Number(stats.monthlyBudget) || 0;
+      
+      // Calculate the remaining budget (ensure it's not negative)
+      const remainingBudget = Math.max(0, monthlyBudget - totalSpent - savingsContribution - totalDebt);
+      
+      console.log("Pie Chart Data:", {
+        transactions: totalSpent,
+        savings: savingsContribution,
+        debts: totalDebt,
+        remaining: remainingBudget
+      });
+      
+      // Make sure we have actual data to display
+      if (totalSpent > 0 || savingsContribution > 0 || totalDebt > 0 || remainingBudget > 0) {
+        // Update pie chart with budget allocation
+        pieChart.data.datasets[0].data = [
+          totalSpent,          // This month's transactions
+          savingsContribution, // This month's savings
+          totalDebt,           // This month's debts
+          remainingBudget      // Remaining budget
+        ];
+      } else {
+        // If no data, set some placeholder values for visual reference
+        pieChart.data.datasets[0].data = [1, 1, 1, 1];
+      }
+      
+      // Update pie chart title and total text
+      document.getElementById("pieTotalText").innerText = 
+        `Monthly Budget: $${monthlyBudget.toFixed(2)} | Remaining: $${remainingBudget.toFixed(2)}`;
+      
+      // Force chart update
+      pieChart.update();
+
+      // Update other charts
+      updateOtherCharts(stats);
+    } else {
+      console.error("Failed to load stats:", result.message);
+    }
+  } catch (error) {
+    console.error("Error fetching stats:", error);
+  }
+}
+
+// Function to update the other charts
+function updateOtherCharts(stats) {
+  // Update bar chart data
+  barChart.data.datasets[0].label = "Balance vs Expenses";
+  barChart.data.datasets[0].data = [
+    stats.monthlyBudget - stats.totalSpent, // Balance
+    stats.totalSpent // Expenses
+  ];
+  barChart.data.labels = ["Balance", "Expenses"];
+  barChart.update();
+
+
+  // Update bar chart text
+  document.getElementById("barTotalText").innerText = 
+    `Balance Estimate: $${(stats.monthlyBudget - stats.totalSpent).toFixed(2)}`;
+}
+
+  // Initialize on page load
+  window.onload = function() {
+    fetchStats();
+    fetchTransactionData();
+  };
+</script>
+</body>
+</html>
