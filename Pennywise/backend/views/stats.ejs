@@ -148,27 +148,6 @@
     .logout:hover {
       background: color #222;
     }
-   .view-toggle {
-      display: flex;
-      justify-content: center;
-      gap: 1rem;
-      margin: 1rem 0;
-      margin-top: 70px;
-    }
-
-    .toggle-btn {
-      background-color: #5fd4ad;
-      color: white;
-      border: none;
-      padding: 0.5rem 1rem;
-      border-radius: 6px;
-      font-weight: bold;
-      cursor: pointer;
-    }
-
-    .toggle-btn:hover {
-      background-color: #5fd4ad;
-    }
     .page-container {
       display: flex;
       flex-direction: column;
@@ -334,11 +313,6 @@ footer {
       <button onclick="logOut()" class="nav-btn logout">Logout</button>
     </div>
 
-<div class="view-toggle">
-  <button class="toggle-btn" onclick="changeView('monthly')">Monthly</button>
-  <button class="toggle-btn" onclick="changeView('weekly')">Weekly</button>
-  <button class="toggle-btn" onclick="changeView('daily')">Daily</button>
-</div>
 <div class="bar-box">
   <canvas id="barChart"></canvas>
   <p id="barTotalText" class="totals"></p>
@@ -397,10 +371,12 @@ footer {
     window.location.href = "/aboutus";
   }
 
-  // Sample data (will be replaced with actual data from API)
-  let labelsMonthly = ["January", "February", "March", "April", "May", "June"];
-  let labelsWeekly = ["Week 1", "Week 2", "Week 3", "Week 4", "Week 5", "Week 6"];
-  let labelsDaily = ["Day 1", "Day 2", "Day 3", "Day 4", "Day 5", "Day 6"];
+  function goStats() {
+    window.location.href = "/stats";
+  }
+
+  // Default labels for monthly view
+  let labels = ["January", "February", "March", "April", "May", "June"];
 
   const barCtx = document.getElementById("barChart").getContext("2d");
   const lineCtx = document.getElementById("lineChart").getContext("2d");
@@ -410,7 +386,7 @@ footer {
   let barChart = new Chart(barCtx, {
     type: "bar",
     data: {
-      labels: labelsMonthly,
+      labels: labels,
       datasets: [{
         label: "Balance",
         data: [],
@@ -432,9 +408,9 @@ footer {
   let lineChart = new Chart(lineCtx, {
     type: "line",
     data: {
-      labels: labelsMonthly,
+      labels: ["Week 1", "Week 2", "Week 3", "Week 4", "Week 5"],
       datasets: [{
-        label: "Expenses",
+        label: "Weekly Expenses",
         data: [],
         borderColor: "#FF5733",
         backgroundColor: "rgba(255, 87, 51, 0.2)",
@@ -448,7 +424,7 @@ footer {
       plugins: {
         title: {
           display: true,
-          text: "Monthly Expenses - Line Chart"
+          text: "Weekly Expenses - Line Chart"
         }
       }
     }
@@ -545,42 +521,18 @@ let pieChart = new Chart(pieCtx, {
   }
 });
 
-
-  // Function to handle view changes
-  function changeView(view) {
-    if (view === 'weekly') {
-      barChart.data.labels = labelsWeekly;
-      lineChart.data.labels = labelsWeekly;
-      barChart.options.plugins.title.text = "Weekly Balance - Bar Chart";
-      lineChart.options.plugins.title.text = "Weekly Expenses - Line Chart";
-      fetchTransactionData('weekly');
-    } else if (view === 'monthly') {
-      barChart.data.labels = labelsMonthly;
-      lineChart.data.labels = labelsMonthly;
-      barChart.options.plugins.title.text = "Monthly Balance - Bar Chart";
-      lineChart.options.plugins.title.text = "Monthly Expenses - Line Chart";
-      fetchTransactionData('monthly');
-    } else if (view === 'daily') {
-      barChart.data.labels = labelsDaily;
-      lineChart.data.labels = labelsDaily;
-      barChart.options.plugins.title.text = "Daily Balance - Bar Chart";
-      lineChart.options.plugins.title.text = "Daily Expenses - Line Chart";
-      fetchTransactionData('daily');
-    }
-
-    barChart.update();
-    lineChart.update();
-  }
-
   // Function to fetch transaction data
-  async function fetchTransactionData(timeframe = 'monthly') {
+  async function fetchTransactionData() {
     try {
       const response = await fetch('/api/transaction');
       const data = await response.json();
       
       if (data.success && data.transactions && data.transactions.length > 0) {
         // Process transactions for the expenses chart
-        displayTransactionsChart(data.transactions, timeframe);
+        displayTransactionsChart(data.transactions);
+        
+        // Process transactions for the weekly expenses chart
+        displayWeeklyExpenses(data.transactions);
         
         // Display recent transactions in the list
         displayTransactionsList(data.transactions);
@@ -593,31 +545,19 @@ let pieChart = new Chart(pieCtx, {
   }
 
   // Function to display transactions in the chart
-  function displayTransactionsChart(transactions, timeframe = 'monthly') {
+  function displayTransactionsChart(transactions) {
     // Sort transactions by date
     transactions.sort((a, b) => new Date(a.date_time) - new Date(b.date_time));
     
-    // Format the data according to the selected timeframe
+    // Format the data for monthly view by default
     let formattedData = {};
     let labels = [];
     let data = [];
     
     transactions.forEach(transaction => {
       const date = new Date(transaction.date_time);
-      let key;
-      
-      // Format the date key based on the timeframe
-      if (timeframe === 'daily') {
-        key = `${date.getMonth() + 1}/${date.getDate()}/${date.getFullYear()}`;
-      } else if (timeframe === 'weekly') {
-        // Get the week number
-        const firstDayOfYear = new Date(date.getFullYear(), 0, 1);
-        const pastDaysOfYear = (date - firstDayOfYear) / 86400000;
-        const weekNum = Math.ceil((pastDaysOfYear + firstDayOfYear.getDay() + 1) / 7);
-        key = `Week ${weekNum}, ${date.getFullYear()}`;
-      } else { // monthly
-        key = `${date.toLocaleString('default', { month: 'short' })} ${date.getFullYear()}`;
-      }
+      // Format for monthly view
+      const key = `${date.toLocaleString('default', { month: 'short' })} ${date.getFullYear()}`;
       
       // Aggregate costs by the key
       if (!formattedData[key]) {
@@ -636,22 +576,52 @@ let pieChart = new Chart(pieCtx, {
     expensesChart.data.labels = labels;
     expensesChart.data.datasets[0].data = data;
     
-    // Set the chart title based on timeframe
-    let titlePrefix;
-    if (timeframe === 'daily') {
-      titlePrefix = 'Daily';
-    } else if (timeframe === 'weekly') {
-      titlePrefix = 'Weekly';
-    } else {
-      titlePrefix = 'Monthly';
-    }
-    expensesChart.options.plugins.title.text = `${titlePrefix} Transaction Expenses`;
+    // Set the chart title
+    expensesChart.options.plugins.title.text = 'Monthly Transaction Expenses';
     
     // Calculate the total expenses
     const totalExpenses = data.reduce((sum, value) => sum + value, 0);
     document.getElementById('expensesTotalText').innerText = `Total Expenses: $${totalExpenses.toFixed(2)}`;
     
     expensesChart.update();
+  }
+
+  // New function to display weekly expenses
+  function displayWeeklyExpenses(transactions) {
+    // Sort transactions by date
+    transactions.sort((a, b) => new Date(a.date_time) - new Date(b.date_time));
+    
+    // Get current date and start of the month
+    const now = new Date();
+    const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+    
+    // Filter transactions for current month only
+    const currentMonthTransactions = transactions.filter(transaction => {
+      const transactionDate = new Date(transaction.date_time);
+      return transactionDate >= startOfMonth && transactionDate <= now;
+    });
+    
+    // Group transactions by week of the month
+    const weeklyData = [0, 0, 0, 0, 0]; // Initialize with 5 weeks (0 values)
+    
+    currentMonthTransactions.forEach(transaction => {
+      const transactionDate = new Date(transaction.date_time);
+      // Get week number (0-indexed)
+      const weekOfMonth = Math.floor((transactionDate.getDate() - 1) / 7);
+      
+      // Add to appropriate week's total (clamp to 0-4 index)
+      const weekIndex = Math.min(weekOfMonth, 4);
+      weeklyData[weekIndex] += parseFloat(transaction.cost);
+    });
+    
+    // Update the weekly expenses line chart
+    lineChart.data.datasets[0].data = weeklyData;
+    
+    // Calculate the total weekly expenses
+    const totalWeeklyExpenses = weeklyData.reduce((sum, value) => sum + value, 0);
+    document.getElementById('lineTotalText').innerText = `Total Weekly Expenses: $${totalWeeklyExpenses.toFixed(2)}`;
+    
+    lineChart.update();
   }
 
   // Function to display transactions in the list
@@ -780,88 +750,13 @@ function updateOtherCharts(stats) {
   // Update bar chart text
   document.getElementById("barTotalText").innerText = 
     `Balance Estimate: $${(stats.monthlyBudget - stats.totalSpent).toFixed(2)}`;
-
-  // Update line chart data
-  lineChart.data.datasets[0].data = [
-    stats.totalSpent, stats.totalSpent * 0.9, stats.totalSpent * 1.1,
-    stats.totalSpent * 0.8, stats.totalSpent * 1.2, stats.totalSpent
-  ];
-  lineChart.update();
-
-  // Update line chart text
-  document.getElementById("lineTotalText").innerText = 
-    `Total Spent This Month: $${stats.totalSpent.toFixed(2)}`;
 }
 
   // Initialize on page load
   window.onload = function() {
     fetchStats();
-    fetchTransactionData('monthly'); // Default to monthly view
+    fetchTransactionData();
   };
-
-  // Add this function to check the data from your API
-async function checkPieChartData() {
-  try {
-    // Show loading message
-    document.getElementById("pieTotalText").innerText = "Loading budget data...";
-    
-    // Make API request
-    const response = await fetch('/api/stats');
-    const data = await response.json();
-    
-    // Log the full response for debugging
-    console.log("API Response:", data);
-    
-    if (data.success && data.data) {
-      // Extract the values we need
-      const {
-        monthlyBudget = 0,
-        totalSpent = 0,
-        savingsContribution = 0,
-        totalDebt = 0,
-        remainingBudget = 0
-      } = data.data;
-      
-      // Log the extracted values
-      console.log("Pie Chart Values:", {
-        monthlyBudget,
-        totalSpent,
-        savingsContribution,
-        totalDebt,
-        remainingBudget
-      });
-      
-      // Show values on page for debugging
-      document.getElementById("pieTotalText").innerHTML = `
-        <div style="text-align: left; margin-top: 10px;">
-          <p>Monthly Budget: $${monthlyBudget.toFixed(2)}</p>
-          <p>Total Spent: $${totalSpent.toFixed(2)}</p>
-          <p>Savings: $${savingsContribution.toFixed(2)}</p>
-          <p>Debt: $${totalDebt.toFixed(2)}</p>
-          <p>Remaining: $${remainingBudget.toFixed(2)}</p>
-        </div>
-      `;
-      
-      return {
-        monthlyBudget,
-        totalSpent,
-        savingsContribution,
-        totalDebt,
-        remainingBudget
-      };
-    } else {
-      console.error("API returned error or missing data:", data);
-      document.getElementById("pieTotalText").innerText = "Error loading budget data";
-      return null;
-    }
-  } catch (error) {
-    console.error("Error checking pie chart data:", error);
-    document.getElementById("pieTotalText").innerText = "Error: " + error.message;
-    return null;
-  }
-}
-
-
 </script>
 </body>
 </html>
