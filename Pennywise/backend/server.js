@@ -419,34 +419,61 @@ app.post("/api/savings", async (req, res) => {
 //STATS route
 // This route fetches the user's budget, total spent, savings goal, and total debt
 
+// Updated Stats API Endpoint with current month filtering
 app.get("/api/stats", async (req, res) => {
   const userId = req.session.userId;
+  const username = req.session.username;
 
-  if (!userId) {
-    return res.status(401).json({ message: "Unauthorized" });
+  if (!userId && !username) {
+    return res.status(401).json({ success: false, message: "Unauthorized" });
   }
 
   try {
-    // Fetch all necessary data in parallel
-    const [budgetRes, transactionRes, savingsRes, debtRes] = await Promise.all([
-      db.query("SELECT monthly_budget FROM budgets WHERE user_id = $1", [userId]),
-      db.query("SELECT SUM(cost) AS total_spent FROM transactions WHERE user_id = $1", [userId]),
-      db.query("SELECT goal_amount, saved_amount, last_contribution FROM savings WHERE user_id = $1", [userId]),
-      db.query("SELECT SUM(amount) AS total_debt FROM debts WHERE user_id = $1", [userId]),
-    ]);
+    // Get current month's start and end dates
+    const now = new Date();
+    const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+    const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59, 999);
+    
+    // Format dates for Postgres
+    const startOfMonthStr = startOfMonth.toISOString();
+    const endOfMonthStr = endOfMonth.toISOString();
+    
+    console.log(`Filtering for month: ${startOfMonthStr} to ${endOfMonthStr}`);
+
+    // Fetch budget data - using username since that's what your budgets table uses
+    const budgetRes = await db.query(
+      "SELECT monthly_budget FROM budgets WHERE username = $1", 
+      [username]
+    );
+
+    // Fetch transactions for current month only - using username since that's what your transactions table uses
+    const transactionRes = await db.query(
+      "SELECT SUM(cost) AS total_spent FROM transactions WHERE username = $1 AND date_time >= $2 AND date_time <= $3", 
+      [username, startOfMonthStr, endOfMonthStr]
+    );
+    
+    // Fetch savings contributions for current month - using userId since that's what your savings table uses
+    const savingsRes = await db.query(
+      "SELECT SUM(last_contribution) AS total_contribution FROM savings WHERE user_id = $1 AND updated_at >= $2 AND updated_at <= $3", 
+      [userId, startOfMonthStr, endOfMonthStr]
+    );
+    
+    // Fetch debt payments for current month - using userId since that's what your debts table uses
+    const debtRes = await db.query(
+      "SELECT SUM(amount) AS total_debt FROM debts WHERE user_id = $1 AND due_date >= $2 AND due_date <= $3", 
+      [userId, startOfMonthStr, endOfMonthStr]
+    );
 
     // Get the monthly budget or default to 0
-    const monthlyBudget = budgetRes.rows[0]?.monthly_budget || 0;
+    const monthlyBudget = parseFloat(budgetRes.rows[0]?.monthly_budget || 0);
     
-    // Get total spent or default to 0
+    // Get total spent this month or default to 0
     const totalSpent = parseFloat(transactionRes.rows[0]?.total_spent || 0);
     
-    // Get savings data or default to 0
-    const savingsGoal = parseFloat(savingsRes.rows[0]?.goal_amount || 0);
-    const savedAmount = parseFloat(savingsRes.rows[0]?.saved_amount || 0);
-    const savingsContribution = parseFloat(savingsRes.rows[0]?.last_contribution || 0);
+    // Get savings contribution this month or default to 0
+    const savingsContribution = parseFloat(savingsRes.rows[0]?.total_contribution || 0);
     
-    // Get total debt or default to 0
+    // Get total debt this month or default to 0
     const totalDebt = parseFloat(debtRes.rows[0]?.total_debt || 0);
     
     // Calculate remaining budget
@@ -457,16 +484,14 @@ app.get("/api/stats", async (req, res) => {
       data: {
         monthlyBudget,
         totalSpent,
-        savingsGoal,
-        savedAmount,
         savingsContribution,
-        totalDebt,
+        totalDebt,            
         remainingBudget
       }
     });
   } catch (error) {
     console.error("Error fetching stats:", error);
-    res.status(500).json({ message: "Error fetching stats." });
+    res.status(500).json({ success: false, message: "Error fetching stats: " + error.message });
   }
 });
 // 🆕 Monthly Expenses Data for Chart
