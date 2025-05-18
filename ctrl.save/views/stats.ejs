@@ -125,6 +125,7 @@
       gap: .5rem;
       margin-top: -70px;
       margin-right: 30px;
+      margin-bottom: 50px; /* Added more space below navigation */
     }
     .nav-btn {
       background-color: white;
@@ -285,6 +286,11 @@ footer {
   border-bottom-left-radius: 20px;
   border-bottom-right-radius: 20px;
 }
+
+/* Added a container for charts with top padding */
+.charts-container {
+  padding-top: 30px;
+}
   </style>
 </head>
 <body>
@@ -313,24 +319,26 @@ footer {
       <button onclick="logOut()" class="nav-btn logout">Logout</button>
     </div>
 
-<div class="bar-box">
-  <canvas id="barChart"></canvas>
-  <p id="barTotalText" class="totals"></p>
-</div>
+<div class="charts-container">
+  <div class="bar-box">
+    <canvas id="barChart"></canvas>
+    <p id="barTotalText" class="totals"></p>
+  </div>
 
-<div class="line-box">
-  <canvas id="lineChart"></canvas>
-  <p id="lineTotalText" class="totals"></p>
-</div>
+  <div class="line-box">
+    <canvas id="lineChart"></canvas>
+    <p id="lineTotalText" class="totals"></p>
+  </div>
 
-<div class="line-box">
-  <canvas id="expensesChart"></canvas>
-  <p id="expensesTotalText" class="totals"></p>
-</div>
+  <div class="line-box">
+    <canvas id="expensesChart"></canvas>
+    <p id="expensesTotalText" class="totals"></p>
+  </div>
 
-<div class="pie-box">
-  <canvas id="pieChart"></canvas>
-  <p id="pieTotalText" class="totals"></p>
+  <div class="pie-box">
+    <canvas id="pieChart"></canvas>
+    <p id="pieTotalText" class="totals"></p>
+  </div>
 </div>
 
 <footer>
@@ -613,40 +621,42 @@ let pieChart = new Chart(pieCtx, {
   // Function to display transactions in the list
   function displayTransactionsList(transactions) {
     const container = document.getElementById('transactionsContainer');
-    container.innerHTML = ''; // Clear existing content
-    
-    // Sort transactions by date (newest first)
-    transactions.sort((a, b) => new Date(b.date_time) - new Date(a.date_time));
-    
-    // Take only the 5 most recent transactions
-    const recentTransactions = transactions.slice(0, 5);
-    
-    if (recentTransactions.length === 0) {
-      container.innerHTML = '<p>No transactions found.</p>';
-      return;
-    }
-    
-    recentTransactions.forEach(transaction => {
-      const date = new Date(transaction.date_time);
-      const formattedDate = date.toLocaleDateString('en-US', { 
-        year: 'numeric', 
-        month: 'short', 
-        day: 'numeric' 
+    if (container) {
+      container.innerHTML = ''; // Clear existing content
+      
+      // Sort transactions by date (newest first)
+      transactions.sort((a, b) => new Date(b.date_time) - new Date(a.date_time));
+      
+      // Take only the 5 most recent transactions
+      const recentTransactions = transactions.slice(0, 5);
+      
+      if (recentTransactions.length === 0) {
+        container.innerHTML = '<p>No transactions found.</p>';
+        return;
+      }
+      
+      recentTransactions.forEach(transaction => {
+        const date = new Date(transaction.date_time);
+        const formattedDate = date.toLocaleDateString('en-US', { 
+          year: 'numeric', 
+          month: 'short', 
+          day: 'numeric' 
+        });
+        
+        const transactionElement = document.createElement('div');
+        transactionElement.className = 'transaction-item';
+        transactionElement.innerHTML = `
+          <h4>
+            ${transaction.name} 
+            <span class="transaction-amount">$${parseFloat(transaction.cost).toFixed(2)}</span>
+          </h4>
+          <p>${transaction.description}</p>
+          <p><small>${formattedDate}</small></p>
+        `;
+        
+        container.appendChild(transactionElement);
       });
-      
-      const transactionElement = document.createElement('div');
-      transactionElement.className = 'transaction-item';
-      transactionElement.innerHTML = `
-        <h4>
-          ${transaction.name} 
-          <span class="transaction-amount">$${parseFloat(transaction.cost).toFixed(2)}</span>
-        </h4>
-        <p>${transaction.description}</p>
-        <p><small>${formattedDate}</small></p>
-      `;
-      
-      container.appendChild(transactionElement);
-    });
+    }
   }
 
   // Function to add a note (placeholder function)
