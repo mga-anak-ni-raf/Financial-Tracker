@@ -626,29 +626,35 @@ window.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // CLIENT SIDE: Update the savings functions in your wallet.js
-
-// Update these functions in your wallet.ejs template
+ // CLIENT SIDE: Update the savings functions in your wallet.js
 
 function addSavings() {
   const goalAmount = parseFloat(document.getElementById("savingsGoalAmount").value);
   const contribution = parseFloat(document.getElementById("savingsContribution").value);
 
-  if (isNaN(goalAmount) || isNaN(contribution) || goalAmount <= 0 || contribution <= 0) {
-    alert("Please enter valid goal and contribution amounts.");
+  if (isNaN(goalAmount) || goalAmount <= 0) {
+    alert("Please enter a valid savings goal amount.");
     return;
   }
 
-  // Send to server with consistent parameter names
+  if (isNaN(contribution) || contribution <= 0) {
+    alert("Please enter a valid contribution amount.");
+    return;
+  }
+
+  // Send to server with proper parameter naming
   fetch('/api/savings', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ goalAmount, contribution })
+    body: JSON.stringify({ 
+      goalAmount: goalAmount, 
+      contribution: contribution 
+    })
   })
     .then(res => res.json())
     .then(data => {
       if (data.success) {
-        console.log("Savings added successfully");
+        console.log("Savings added successfully:", data);
         
         // Update local values
         savingsGoal = goalAmount;
@@ -657,14 +663,14 @@ function addSavings() {
         updateSavingsDisplay();
         
         // Clear input fields
-        document.getElementById("savingsGoalAmount").value = "";
         document.getElementById("savingsContribution").value = "";
       } else {
+        console.error("Error saving:", data);
         alert("Error: " + (data.message || "Failed to save"));
       }
     })
     .catch(err => {
-      console.error("Error saving savings:", err);
+      console.error("Error adding savings:", err);
       alert("An error occurred while saving");
     });
 }
@@ -673,16 +679,20 @@ function loadSavings() {
   fetch('/api/savings')
     .then(res => res.json())
     .then(data => {
+      console.log("Savings data received:", data); // Debug log
+      
       if (data.success && data.savings) {
-        console.log("Loaded savings:", data.savings);
+        savingsGoal = parseFloat(data.savings.goal) || 0;
+        savingsSaved = parseFloat(data.savings.saved) || 0;
         
-        // Match the property names from the updated server response
-        savingsGoal = data.savings.goal || 0;
-        savingsSaved = data.savings.saved || 0;
+        // Pre-fill the goal amount field with the current goal
+        if (savingsGoal > 0) {
+          document.getElementById("savingsGoalAmount").value = savingsGoal;
+        }
         
         updateSavingsDisplay();
       } else {
-        console.error("Invalid savings response");
+        console.error("Invalid savings response:", data);
       }
     })
     .catch(err => {

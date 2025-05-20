@@ -326,37 +326,55 @@ app.route("/api/transaction")
 
 //SAVINGS route
 
+// SERVER SIDE: Fix the savings routes
+
 // GET: Fetch user's savings
 app.get("/api/savings", async (req, res) => {
+  // First try userId from session, then fall back to finding by username if needed
   const userId = req.session.userId;
+  const username = req.session.username;
   
-  if (!userId) {
-    return res.status(401).json({ message: "Unauthorized" });
+  if (!userId && !username) {
+    return res.status(401).json({ success: false, message: "Unauthorized" });
   }
 
   try {
-    const result = await db.query(
-      "SELECT goal_amount, saved_amount, last_contribution FROM savings WHERE user_id = $1",
-      [userId]
-    );
+    let result;
     
-    if (result.rows.length > 0) {
+    // If we have userId, use it directly
+    if (userId) {
+      result = await db.query(
+        "SELECT goal_amount, saved_amount, last_contribution FROM savings WHERE user_id = $1",
+        [userId]
+      );
+    } 
+    // Otherwise look up the user_id from username
+    else if (username) {
+      const userResult = await db.query("SELECT id FROM users WHERE username = $1", [username]);
+      if (userResult.rows.length > 0) {
+        const userId = userResult.rows[0].id;
+        result = await db.query(
+          "SELECT goal_amount, saved_amount, last_contribution FROM savings WHERE user_id = $1",
+          [userId]
+        );
+      } else {
+        return res.status(404).json({ success: false, message: "User not found" });
+      }
+    }
+    
+    if (result && result.rows.length > 0) {
       res.json({ 
         success: true, 
         savings: {
-          goal: result.rows[0].goal_amount,
-          saved: result.rows[0].saved_amount,
-          contribution: result.rows[0].last_contribution
+          goal: parseFloat(result.rows[0].goal_amount) || 0,
+          saved: parseFloat(result.rows[0].saved_amount) || 0,
+          contribution: parseFloat(result.rows[0].last_contribution) || 0
         }
       });
     } else {
       res.json({ 
         success: true, 
-        savings: { 
-          goal: 0, 
-          saved: 0,
-          contribution: 0 
-        } 
+        savings: { goal: 0, saved: 0, contribution: 0 } 
       });
     }
   } catch (err) {
@@ -367,22 +385,44 @@ app.get("/api/savings", async (req, res) => {
 
 // POST: Save or update user's savings
 app.post("/api/savings", async (req, res) => {
+  // Debugging: Log the entire request body
+  console.log("Savings POST body:", req.body);
+  
   const userId = req.session.userId;
+  const username = req.session.username;
   const { goalAmount, contribution } = req.body;
 
-  if (!userId) {
-    return res.status(401).json({ message: "Unauthorized" });
+  if (!userId && !username) {
+    return res.status(401).json({ success: false, message: "Unauthorized" });
   }
 
-  if (!goalAmount || !contribution) {
-    return res.status(400).json({ message: "Missing savings data." });
+  if (goalAmount === undefined || contribution === undefined) {
+    return res.status(400).json({ 
+      success: false, 
+      message: "Missing savings data. Required: goalAmount and contribution.",
+      received: req.body
+    });
   }
 
   try {
+    let actualUserId = userId;
+    
+    // If userId is not in session, get it from username
+    if (!actualUserId && username) {
+      const userResult = await db.query("SELECT id FROM users WHERE username = $1", [username]);
+      if (userResult.rows.length === 0) {
+        return res.status(404).json({ success: false, message: "User not found." });
+      }
+      actualUserId = userResult.rows[0].id;
+      
+      // Update the session with the userId
+      req.session.userId = actualUserId;
+    }
+
     // Check if savings record exists for this user
     const existing = await db.query(
       "SELECT * FROM savings WHERE user_id = $1",
-      [userId]
+      [actualUserId]
     );
 
     const now = new Date();
@@ -396,7 +436,7 @@ app.post("/api/savings", async (req, res) => {
              last_contribution = $2,
              updated_at = $3
          WHERE user_id = $4`,
-        [goalAmount, contribution, now, userId]
+        [goalAmount, contribution, now, actualUserId]
       );
     } else {
       // Insert new record
@@ -404,17 +444,27 @@ app.post("/api/savings", async (req, res) => {
         `INSERT INTO savings 
          (user_id, goal_amount, saved_amount, last_contribution, updated_at)
          VALUES ($1, $2, $3, $4, $5)`,
-        [userId, goalAmount, contribution, contribution, now]
+        [actualUserId, goalAmount, contribution, contribution, now]
       );
     }
 
-    res.json({ success: true, message: "Savings updated successfully." });
+    res.json({ 
+      success: true, 
+      message: "Savings updated successfully.",
+      data: {
+        goalAmount,
+        contribution,
+        userId: actualUserId
+      }
+    });
   } catch (err) {
     console.error('Error saving savings data:', err);
-    res.status(500).json({ success: false, message: "Error saving savings data." });
+    res.status(500).json({ 
+      success: false, 
+      message: "Error saving savings data: " + err.message
+    });
   }
 });
-
   
 //STATS route
 // This route fetches the user's budget, total spent, savings goal, and total debt
