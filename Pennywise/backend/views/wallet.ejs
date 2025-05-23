@@ -68,7 +68,7 @@
         transform-origin: left;
       }
       .text {
-        font-family: poppins;
+        font-family: "Poppins", sans-serif;
         font-size: 27px;
         font-weight: 800;
         color: transparent;
@@ -148,7 +148,7 @@
     }
 
     .logout:hover {
-      background: color #222;
+      background-color: #222;
     }
 
       .container {
@@ -224,6 +224,14 @@
         background-color: #45a049;
       }
 
+        .delete-btn {
+            background-color: #f44336; /* Red color for delete */
+        }
+
+        .delete-btn:hover {
+            background-color: #d32f2f;
+        }
+
       .result,
       .transactions,
       .savings,
@@ -246,6 +254,9 @@
         border-radius: 4px;
         box-shadow: 0 0 3px rgba(0, 0, 0, 0.1);
         font-size: 14px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
       }
 
       .progress-bar-container {
@@ -280,20 +291,20 @@
   </head>
   <body>
    <header>
-  <div class="center">
-    <input type="checkbox" name="toggle" id="toggle" />
-    <label for="toggle" class="switch">
-      <div class="mode">
-        <div class="text">ctrl</div>
-      </div>
-      <div class="mode">
-        <div class="text">save</div>
-      </div>
-      <div class="indicator left"></div>
-      <div class="indicator right"></div>
-    </label>
-  </div>
-  </header>
+ <div class="center">
+   <input type="checkbox" name="toggle" id="toggle" />
+   <label for="toggle" class="switch">
+     <div class="mode">
+       <div class="text">ctrl</div>
+     </div>
+     <div class="mode">
+       <div class="text">save</div>
+     </div>
+     <div class="indicator left"></div>
+     <div class="indicator right"></div>
+   </label>
+ </div>
+ </header>
 
     <div class="nav-container">
       <button onclick="goHome()" class="nav-btn">Home</button>
@@ -304,8 +315,7 @@
     </div>
 
     <div class="container">
-      <!-- Left Container for Budget and Transactions -->
-      <div class="left-container">
+            <div class="left-container">
         <div class="budget-container">
           <h1>Budget Planner</h1>
           <label for="monthlyBudget">Enter your monthly budget:</label>
@@ -329,8 +339,7 @@
         </div>
       </div>
 
-      <!-- Right Container for Savings and Debts -->
-      <div class="right-container">
+            <div class="right-container">
         <div class="savings-container">
           <h2>Set a Savings Goal</h2>
           <label for="savingsGoalAmount">Savings Goal (₱):</label>
@@ -489,36 +498,34 @@
         });
       }
 
-      
-     
       function loadTransactions() {
-  fetch('/api/transaction')
-    .then(res => res.json())
-    .then(data => {
-      console.log("Fetched data:", data); // 🔍 LOG THIS
+ fetch('/api/transaction')
+   .then(res => res.json())
+   .then(data => {
+     console.log("Fetched data:", data);
 
-      if (data.success && Array.isArray(data.transactions)) {
-        transactions = data.transactions.map(t => ({
-          name: t.name,
-          cost: t.cost,
-          description: t.description,
-          dateTime: new Date(t.date_time).toLocaleString()
-        }));
-        displayTransactions();
-      } else {
-        console.error("Invalid response format or no transactions.");
-      }
-    })
-    .catch(err => {
-      console.error("Error loading transactions:", err);
-    });
+     if (data.success && Array.isArray(data.transactions)) {
+       transactions = data.transactions.map(t => ({
+         name: t.name,
+         cost: t.cost,
+         description: t.description,
+         dateTime: new Date(t.date_time).toLocaleString()
+       }));
+       displayTransactions();
+     } else {
+       console.error("Invalid response format or no transactions.");
+     }
+   })
+   .catch(err => {
+     console.error("Error loading transactions:", err);
+   });
 }
 
 window.addEventListener('DOMContentLoaded', () => {
   loadBudget();
   loadTransactions();
   loadDebts();
-  loadSavings(); // 👈 Include this
+  loadSavings();
 });
 
 
@@ -570,10 +577,10 @@ window.addEventListener('DOMContentLoaded', () => {
       .then((res) => res.json())
       .then((data) => {
         console.log('Debt added:', data);
+        debt.id = data.id; 
         debts.push(debt);
         displayDebts();
 
-        // Clear input fields
         document.getElementById("debtName").value = "";
         document.getElementById("debtAmount").value = "";
         document.getElementById("debtInterest").value = "";
@@ -582,12 +589,41 @@ window.addEventListener('DOMContentLoaded', () => {
       .catch((err) => console.error('Error:', err));
   }
 
-  function loadDebts() {
+    function deleteDebt(debtId) {
+        if (!confirm("Are you sure you want to delete this debt?")) {
+            return;
+        }
+
+        fetch(`/api/debt/${debtId}`, {
+            method: 'DELETE',
+            headers: { 'Content-Type': 'application/json' },
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.success) {
+                console.log('Debt deleted:', data);
+                debts = debts.filter(debt => debt.id !== debtId);
+                displayDebts();
+            } else {
+                console.error('Error deleting debt:', data.message);
+                alert("Error: " + (data.message || "Failed to delete debt"));
+            }
+        })
+        .catch(err => {
+            console.error('Error during fetch delete debt:', err);
+            alert("An error occurred while deleting debt.");
+        });
+    }
+
+
+ function loadDebts() {
     fetch('/api/debt')
       .then(res => res.json())
       .then(data => {
         if (data.success && Array.isArray(data.debts)) {
           debts = data.debts.map(d => ({
+                id: d.debt_id,
+            // Use backend values if available, else fallback to local
             name: d.name,
             amount: d.amount,
             interest: d.interest,
@@ -621,12 +657,11 @@ window.addEventListener('DOMContentLoaded', () => {
           <p>Interest: ${debt.interest}%</p>
           <p>Due Date: ${debt.dueDate}</p>
         </div>
+        <button onclick="deleteDebt(${debt.id})" class="nav-btn delete-btn">Delete</button>
       `;
       debtListDiv.appendChild(item);
     });
   }
-
- // CLIENT SIDE: Update the savings functions in your wallet.js
 
 function addSavings() {
   const goalAmount = parseFloat(document.getElementById("savingsGoalAmount").value);
@@ -642,7 +677,6 @@ function addSavings() {
     return;
   }
 
-  // Send to server with proper parameter naming
   fetch('/api/savings', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -655,15 +689,21 @@ function addSavings() {
     .then(data => {
       if (data.success) {
         console.log("Savings added successfully:", data);
-        
-        // Update local values
-        savingsGoal = goalAmount;
-        savingsSaved += contribution;
-        
+
+        // Use backend values if available, else fallback to local
+        if (data.savings) {
+          savingsGoal = parseFloat(data.savings.goal) || goalAmount;
+          savingsSaved = parseFloat(data.savings.saved) || (savingsSaved + contribution);
+        } else {
+          savingsGoal = goalAmount;
+          savingsSaved += contribution;
+        }
+
         updateSavingsDisplay();
-        
-        // Clear input fields
+
         document.getElementById("savingsContribution").value = "";
+        // Optionally clear goal field:
+        // document.getElementById("savingsGoalAmount").value = "";
       } else {
         console.error("Error saving:", data);
         alert("Error: " + (data.message || "Failed to save"));
@@ -679,13 +719,12 @@ function loadSavings() {
   fetch('/api/savings')
     .then(res => res.json())
     .then(data => {
-      console.log("Savings data received:", data); // Debug log
+      console.log("Savings data received:", data);
       
       if (data.success && data.savings) {
         savingsGoal = parseFloat(data.savings.goal) || 0;
         savingsSaved = parseFloat(data.savings.saved) || 0;
         
-        // Pre-fill the goal amount field with the current goal
         if (savingsGoal > 0) {
           document.getElementById("savingsGoalAmount").value = savingsGoal;
         }
@@ -707,7 +746,6 @@ function updateSavingsDisplay() {
   const progress = savingsGoal > 0 ? (savingsSaved / savingsGoal) * 100 : 0;
   document.getElementById("progressBar").style.width = `${Math.min(progress, 100)}%`;
 }
-
 
     </script>
   </body>
