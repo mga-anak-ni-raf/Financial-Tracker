@@ -264,11 +264,47 @@ app.route("/api/transaction")
       });
   });
 
+// DELETE: Remove a transaction by ID
+app.delete("/api/transaction/:id", async (req, res) => {
+  const transactionId = req.params.id;
+  const username = req.session.username;
+
+  if (!username) {
+    return res.status(401).json({ success: false, message: "Unauthorized" });
+  }
+  if (!transactionId) {
+    return res.status(400).json({ success: false, message: "Transaction ID is required." });
+  }
+
+  try {
+    // Verify ownership
+    const checkQuery = `SELECT username FROM transactions WHERE id = $1`;
+    const checkResult = await db.query(checkQuery, [transactionId]);
+    if (checkResult.rows.length === 0) {
+      return res.status(404).json({ success: false, message: "Transaction not found." });
+    }
+    if (checkResult.rows[0].username !== username) {
+      return res.status(403).json({ success: false, message: "Forbidden: You do not own this transaction." });
+    }
+
+    // Delete transaction
+    const deleteQuery = `DELETE FROM transactions WHERE id = $1 AND username = $2`;
+    const deleteResult = await db.query(deleteQuery, [transactionId, username]);
+    if (deleteResult.rowCount === 0) {
+      return res.status(404).json({ success: false, message: "Transaction not found or already deleted." });
+    }
+
+    res.json({ success: true, message: "Transaction deleted successfully." });
+  } catch (err) {
+    console.error("Error deleting transaction:", err);
+    res.status(500).json({ success: false, message: "Error deleting transaction." });
+  }
+});
 
 // **Debt Routes**
 app.post("/api/debt", async (req, res) => {
   const { name, amount, interest, dueDate } = req.body;
-  const username = req.session.username; // Using username to fetch userId, as suggested in previous review
+  const username = req.session.username; // Using username to fetch userId
 
   if (!username || !name || !amount || !interest || !dueDate) {
     return res.status(400).json({ message: "Missing debt data." });
@@ -321,7 +357,7 @@ app.get("/api/debt", (req, res) => {
     });
 });
 
-// NEW: DELETE /api/debt/:id - Delete a specific debt
+// DELETE /api/debt/:id - Delete a specific debt
 app.delete("/api/debt/:id", async (req, res) => {
   const debtId = req.params.id;
   const userId = req.session.userId;
@@ -367,10 +403,7 @@ app.delete("/api/debt/:id", async (req, res) => {
   }
 });
 
-
 //SAVINGS route
-
-// SERVER SIDE: Fix the savings routes
 
 // GET: Fetch user's savings
 app.get("/api/savings", async (req, res) => {
